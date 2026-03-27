@@ -1,0 +1,201 @@
+task_id,task_name,department,target_role,required_skills,task_complexity,estimated_hours,task_priority,task_duration,criticality
+T_1001,Project Support 1,Research & Development,Research Scientist,"Python, Scientific Writing",High,47,High,Long,Non-critical
+T_1002,Project Analysis 2,Sales,Sales Representative,Customer Service,Low,8,Medium,Midterm,Non-critical
+T_1003,Project Analysis 3,Sales,Sales Executive,Negotiation,Low,5,High,Midterm,Critical
+T_1004,Project Administrative 4,Research & Development,Healthcare Representative,"Patient Communication, Medical Knowledge",Low,8,Low,Midterm,Critical
+T_1005,Project Field Work 5,Sales,Manager,"Leadership, Budgeting",Low,8,Low,Long,Non-critical
+T_1006,Project Strategic 6,Research & Development,Research Scientist,Scientific Writing,Medium,15,Low,Short,Non-critical
+T_1007,Project Strategic 7,Research & Development,Research Scientist,Python,Low,8,High,Long,Critical
+T_1008,Project Support 8,Sales,Sales Executive,"CRM, Sales Pitch",High,68,Medium,Midterm,Critical
+T_1009,Project Analysis 9,Sales,Manager,"Budgeting, Leadership",Low,7,Low,Short,Non-critical
+T_1010,Project Strategic 10,Research & Development,Research Director,"Advanced R&D, Project Management",Medium,21,Medium,Short,Non-critical
+T_1011,Project Field Work 11,Research & Development,Healthcare Representative,Compliance,High,91,Medium,Short,Critical
+T_1012,Project Development 12,Research & Development,Laboratory Technician,"Safety Protocols, Equipment Calibration",High,82,Medium,Midterm,Non-critical
+T_1013,Project Development 13,Research & Development,Research Director,Project Management,Low,2,Medium,Long,Critical
+T_1014,Project Analysis 14,Human Resources,Human Resources,Payroll,High,47,Medium,Short,Non-critical
+T_1015,Project Administrative 15,Research & Development,Research Scientist,Scientific Writing,Low,6,Low,Midterm,Non-critical
+T_1016,Project Strategic 16,Sales,Sales Representative,Cold Calling,Medium,11,Medium,Midterm,Non-critical
+T_1017,Project Field Work 17,Sales,Manager,"Budgeting, Strategic Planning",High,99,Medium,Midterm,Critical
+T_1018,Project Analysis 18,Sales,Sales Executive,"Sales Pitch, Negotiation",High,74,Medium,Midterm,Non-critical
+T_1019,Project Development 19,Research & Development,Research Director,"Project Management, Grant Writing",Medium,29,Low,Short,Critical
+T_1020,Project Field Work 20,Sales,Sales Executive,"Negotiation, Sales Pitch",Medium,16,High,Long,Critical
+T_1021,Project Analysis 21,Sales,Sales Executive,"Sales Pitch, Market Analysis",Low,9,High,Short,Non-critical
+T_1022,Project Development 22,Research & Development,Healthcare Representative,"Compliance, Patient Communication",High,48,Medium,Midterm,Non-critical
+T_1023,Project Strategic 23,Research & Development,Manufacturing Director,Lean Six Sigma,Medium,27,Medium,Short,Critical
+T_1024,Project Administrative 24,Sales,Manager,Conflict Resolution,Medium,15,Low,Long,Critical
+T_1025,Project Field Work 25,Human Resources,Human Resources,"Recruitment, Training",Medium,26,High,Long,Non-critical
+T_1026,Project Development 26,Research & Development,Healthcare Representative,Patient Communication,High,85,Medium,Midterm,Critical
+T_1027,Project Development 27,Research & Development,Laboratory Technician,Equipment Calibration,Medium,36,Medium,Midterm,Non-critical
+T_1028,Project Field Work 28,Research & Development,Healthcare Representative,"Medical Knowledge, Patient Communication",Low,2,Medium,Midterm,Critical
+T_1029,Project Development 29,Sales,Sales Executive,"Negotiation, Market Analysis",Low,9,Low,Short,Non-critical
+T_1030,Project Field Work 30,Research & Development,Research Director,Advanced R&D,Medium,34,Medium,Long,Non-critical
+T_1031,Project Field Work 31,Sales,Sales Representative,Customer Service,Low,5,Low,Short,Critical
+T_1032,Project Strategic 32,Sales,Sales Representative,Customer Service,Low,6,Low,Long,Non-critical
+T_1033,Project Support 33,Research & Development,Research Director,"Advanced R&D, Grant Writing",Medium,17,Medium,Short,Non-critical
+T_1034,Project Administrative 34,Research & Development,Healthcare Representative,Medical Knowledge,Medium,20,Medium,Midterm,Critical
+T_1035,Project Strategic 35,Research & Development,Manufacturing Director,"Supply Chain, Operations Management",Medium,19,Medium,Long,Non-critical
+T_1036,Project Support 36,Human Resources,Human Resources,Training,Medium,34,Medium,Short,Non-critical
+T_1037,Project Support 37,Research & Development,Manufacturing Director,Supply Chain,Medium,36,Medium,Short,Non-critical
+T_1038,Project Field Work 38,Research & Development,Research Director,"Grant Writing, Project Management",High,45,High,Midterm,Critical
+T_1039,Project Field Work 39,Research & Development,Healthcare Representative,"Patient Communication, Medical Knowledge",High,71,Low,Midterm,Critical
+T_1040,Project Administrative 40,Research & Development,Research Scientist,Scientific Writing,Medium,23,High,Midterm,Critical
+T_1041,Project Analysis 41,Research & Development,Research Scientist,"Scientific Writing, Laboratory Work",Low,4,Low,Midterm,Critical
+T_1042,Project Field Work 42,Research & Development,Manufacturing Director,Operations Management,Low,2,Medium,Short,Critical
+T_1043,Project Field Work 43,Research & Development,Research Scientist,Scientific Writing,Medium,19,Medium,Long,Non-critical
+T_1044,Project Development 44,Research & Development,Research Scientist,"Python, Data Analysis",Low,3,Low,Midterm,Non-critical
+T_1045,Project Analysis 45,Sales,Sales Executive,"Market Analysis, Sales Pitch",Medium,37,Medium,Long,Critical
+T_1046,Project Field Work 46,Sales,Manager,Budgeting,High,56,High,Midterm,Critical
+T_1047,Project Development 47,Sales,Manager,"Budgeting, Conflict Resolution",High,55,Low,Midterm,Critical
+T_1048,Project Analysis 48,Sales,Manager,Budgeting,High,63,Low,Long,Critical
+T_1049,Project Support 49,Sales,Manager,Leadership,High,59,Low,Long,Non-critical
+T_1050,Project Administrative 50,Research & Development,Healthcare Representative,"Patient Communication, Compliance",Low,7,Medium,Midterm,Critical
+T_1051,Project Field Work 51,Research & Development,Laboratory Technician,Safety Protocols,Low,5,Low,Long,Critical
+T_1052,Project Analysis 52,Sales,Sales Executive,CRM,High,58,Low,Short,Non-critical
+T_1053,Project Strategic 53,Human Resources,Human Resources,"Payroll, Employee Relations",Medium,30,Medium,Long,Critical
+T_1054,Project Field Work 54,Research & Development,Manufacturing Director,Supply Chain,High,62,Low,Short,Non-critical
+T_1055,Project Field Work 55,Research & Development,Research Scientist,"Scientific Writing, Laboratory Work",High,67,Low,Short,Critical
+T_1056,Project Analysis 56,Human Resources,Human Resources,Training,Low,2,Low,Short,Non-critical
+T_1057,Project Administrative 57,Human Resources,Human Resources,"Recruitment, Training",Low,8,Low,Midterm,Non-critical
+T_1058,Project Analysis 58,Sales,Sales Executive,"Market Analysis, Negotiation",High,57,Low,Long,Non-critical
+T_1059,Project Strategic 59,Sales,Manager,Strategic Planning,High,94,Low,Short,Non-critical
+T_1060,Project Field Work 60,Research & Development,Manufacturing Director,Operations Management,Medium,21,Medium,Short,Critical
+T_1061,Project Support 61,Human Resources,Human Resources,Recruitment,Medium,35,High,Short,Critical
+T_1062,Project Support 62,Research & Development,Laboratory Technician,"Sample Prep, Safety Protocols",Low,3,Low,Midterm,Critical
+T_1063,Project Development 63,Sales,Manager,"Strategic Planning, Conflict Resolution",High,47,High,Short,Non-critical
+T_1064,Project Field Work 64,Research & Development,Research Scientist,Laboratory Work,High,100,High,Short,Non-critical
+T_1065,Project Support 65,Sales,Manager,"Strategic Planning, Leadership",Medium,24,Medium,Long,Non-critical
+T_1066,Project Administrative 66,Research & Development,Manufacturing Director,Supply Chain,Low,5,Medium,Short,Non-critical
+T_1067,Project Administrative 67,Research & Development,Research Director,"Project Management, Advanced R&D",Medium,23,Low,Short,Critical
+T_1068,Project Analysis 68,Research & Development,Healthcare Representative,"Medical Knowledge, Patient Communication",Low,8,Medium,Short,Non-critical
+T_1069,Project Field Work 69,Research & Development,Research Director,Grant Writing,High,77,High,Midterm,Critical
+T_1070,Project Development 70,Research & Development,Laboratory Technician,Sample Prep,Medium,34,High,Long,Non-critical
+T_1071,Project Field Work 71,Research & Development,Healthcare Representative,"Medical Knowledge, Patient Communication",Low,4,Low,Long,Non-critical
+T_1072,Project Support 72,Research & Development,Laboratory Technician,"Safety Protocols, Sample Prep",High,47,Low,Short,Non-critical
+T_1073,Project Administrative 73,Research & Development,Healthcare Representative,Compliance,High,87,Medium,Short,Non-critical
+T_1074,Project Analysis 74,Sales,Manager,"Leadership, Conflict Resolution",Low,9,Medium,Long,Non-critical
+T_1075,Project Support 75,Sales,Sales Executive,"Sales Pitch, Market Analysis",High,78,Low,Long,Non-critical
+T_1076,Project Development 76,Research & Development,Laboratory Technician,"Safety Protocols, Equipment Calibration",Low,5,Medium,Long,Non-critical
+T_1077,Project Administrative 77,Sales,Sales Executive,"Market Analysis, CRM",Low,9,Medium,Midterm,Non-critical
+T_1078,Project Administrative 78,Research & Development,Manufacturing Director,"Operations Management, Lean Six Sigma",Medium,24,Low,Short,Critical
+T_1079,Project Field Work 79,Sales,Manager,"Leadership, Budgeting",Low,5,Medium,Long,Critical
+T_1080,Project Administrative 80,Research & Development,Manufacturing Director,"Operations Management, Lean Six Sigma",High,48,Low,Short,Non-critical
+T_1081,Project Development 81,Research & Development,Healthcare Representative,"Patient Communication, Medical Knowledge",Low,2,Medium,Short,Critical
+T_1082,Project Analysis 82,Sales,Sales Representative,"Cold Calling, Lead Generation",High,86,Medium,Long,Non-critical
+T_1083,Project Strategic 83,Sales,Manager,"Conflict Resolution, Strategic Planning",High,59,High,Long,Critical
+T_1084,Project Field Work 84,Sales,Sales Executive,"Market Analysis, CRM",High,68,Medium,Short,Critical
+T_1085,Project Administrative 85,Sales,Manager,Leadership,Medium,22,Low,Midterm,Non-critical
+T_1086,Project Support 86,Research & Development,Laboratory Technician,"Safety Protocols, Sample Prep",Medium,14,Low,Short,Non-critical
+T_1087,Project Support 87,Research & Development,Research Scientist,"Scientific Writing, Python",High,46,Medium,Midterm,Critical
+T_1088,Project Support 88,Research & Development,Research Director,"Grant Writing, Advanced R&D",Medium,29,Low,Midterm,Critical
+T_1089,Project Administrative 89,Sales,Sales Executive,CRM,Medium,39,Low,Midterm,Critical
+T_1090,Project Development 90,Human Resources,Human Resources,Recruitment,Medium,26,Low,Long,Non-critical
+T_1091,Project Strategic 91,Sales,Sales Executive,"Market Analysis, Sales Pitch",Low,9,Medium,Midterm,Non-critical
+T_1092,Project Analysis 92,Research & Development,Laboratory Technician,"Equipment Calibration, Safety Protocols",Low,10,Low,Short,Non-critical
+T_1093,Project Analysis 93,Sales,Sales Executive,CRM,Low,6,Low,Short,Critical
+T_1094,Project Strategic 94,Human Resources,Human Resources,Employee Relations,High,75,Medium,Short,Critical
+T_1095,Project Support 95,Sales,Sales Representative,Customer Service,High,86,High,Midterm,Critical
+T_1096,Project Analysis 96,Sales,Sales Executive,Market Analysis,Medium,18,Low,Long,Non-critical
+T_1097,Project Field Work 97,Research & Development,Research Director,Project Management,Low,2,Medium,Midterm,Critical
+T_1098,Project Administrative 98,Research & Development,Research Scientist,"Python, Data Analysis",High,56,High,Long,Critical
+T_1099,Project Analysis 99,Research & Development,Laboratory Technician,Sample Prep,Medium,11,Medium,Midterm,Non-critical
+T_1100,Project Support 100,Sales,Sales Executive,Market Analysis,Low,3,High,Midterm,Critical
+T_1101,Project Support 101,Sales,Sales Representative,"Customer Service, Lead Generation",Low,10,Medium,Short,Non-critical
+T_1102,Project Development 102,Sales,Manager,"Leadership, Budgeting",Low,10,Low,Midterm,Critical
+T_1103,Project Field Work 103,Sales,Manager,"Conflict Resolution, Leadership",Medium,20,Low,Midterm,Non-critical
+T_1104,Project Administrative 104,Research & Development,Laboratory Technician,Equipment Calibration,Medium,14,Medium,Short,Non-critical
+T_1105,Project Field Work 105,Research & Development,Research Director,Project Management,Medium,21,Low,Long,Critical
+T_1106,Project Strategic 106,Research & Development,Manufacturing Director,"Lean Six Sigma, Supply Chain",Low,10,Medium,Midterm,Non-critical
+T_1107,Project Analysis 107,Research & Development,Healthcare Representative,"Medical Knowledge, Compliance",High,94,Medium,Midterm,Critical
+T_1108,Project Support 108,Human Resources,Human Resources,"Employee Relations, Training",Medium,22,Medium,Midterm,Non-critical
+T_1109,Project Strategic 109,Sales,Sales Executive,Sales Pitch,Medium,16,Medium,Midterm,Non-critical
+T_1110,Project Support 110,Sales,Manager,"Strategic Planning, Budgeting",Low,5,High,Long,Critical
+T_1111,Project Support 111,Research & Development,Healthcare Representative,Medical Knowledge,High,81,Medium,Short,Critical
+T_1112,Project Strategic 112,Sales,Sales Representative,"Lead Generation, Cold Calling",Low,2,High,Short,Critical
+T_1113,Project Field Work 113,Sales,Manager,"Strategic Planning, Leadership",Low,7,Low,Long,Non-critical
+T_1114,Project Strategic 114,Sales,Sales Executive,Sales Pitch,High,64,Low,Long,Critical
+T_1115,Project Administrative 115,Research & Development,Manufacturing Director,"Supply Chain, Operations Management",Medium,22,Low,Long,Critical
+T_1116,Project Development 116,Research & Development,Research Scientist,"Python, Data Analysis",High,69,Medium,Short,Critical
+T_1117,Project Analysis 117,Sales,Sales Executive,"Market Analysis, Sales Pitch",Low,9,Medium,Short,Non-critical
+T_1118,Project Development 118,Research & Development,Manufacturing Director,"Lean Six Sigma, Supply Chain",Low,10,High,Midterm,Critical
+T_1119,Project Administrative 119,Sales,Sales Executive,"Sales Pitch, CRM",Low,2,Medium,Midterm,Critical
+T_1120,Project Development 120,Sales,Manager,Conflict Resolution,Low,2,High,Midterm,Non-critical
+T_1121,Project Analysis 121,Research & Development,Research Scientist,Laboratory Work,Medium,37,Low,Midterm,Non-critical
+T_1122,Project Analysis 122,Research & Development,Manufacturing Director,"Lean Six Sigma, Operations Management",High,41,High,Short,Critical
+T_1123,Project Development 123,Human Resources,Human Resources,Payroll,Low,7,Medium,Long,Non-critical
+T_1124,Project Administrative 124,Research & Development,Research Director,"Advanced R&D, Grant Writing",High,73,Low,Long,Critical
+T_1125,Project Support 125,Research & Development,Research Scientist,"Scientific Writing, Python",High,82,High,Long,Critical
+T_1126,Project Field Work 126,Sales,Manager,"Strategic Planning, Conflict Resolution",Medium,17,Low,Short,Critical
+T_1127,Project Field Work 127,Research & Development,Healthcare Representative,Medical Knowledge,High,83,Medium,Short,Non-critical
+T_1128,Project Development 128,Human Resources,Human Resources,"Payroll, Employee Relations",Medium,34,High,Midterm,Non-critical
+T_1129,Project Support 129,Sales,Sales Executive,CRM,Low,5,Medium,Short,Non-critical
+T_1130,Project Development 130,Research & Development,Healthcare Representative,Compliance,High,84,Low,Short,Critical
+T_1131,Project Development 131,Sales,Manager,Strategic Planning,Low,7,High,Short,Non-critical
+T_1132,Project Support 132,Research & Development,Research Director,Grant Writing,High,77,Low,Short,Non-critical
+T_1133,Project Analysis 133,Sales,Manager,Budgeting,Medium,23,High,Long,Non-critical
+T_1134,Project Development 134,Sales,Sales Representative,"Customer Service, Cold Calling",Medium,15,High,Long,Critical
+T_1135,Project Support 135,Research & Development,Manufacturing Director,"Lean Six Sigma, Operations Management",Medium,40,Medium,Short,Non-critical
+T_1136,Project Strategic 136,Sales,Sales Executive,Market Analysis,Medium,15,Low,Midterm,Critical
+T_1137,Project Support 137,Research & Development,Research Director,"Advanced R&D, Grant Writing",Low,4,Medium,Long,Non-critical
+T_1138,Project Strategic 138,Research & Development,Laboratory Technician,Safety Protocols,Low,2,Low,Long,Critical
+T_1139,Project Administrative 139,Sales,Sales Executive,Market Analysis,Low,3,High,Short,Critical
+T_1140,Project Strategic 140,Research & Development,Research Scientist,"Scientific Writing, Data Analysis",Medium,40,Low,Midterm,Non-critical
+T_1141,Project Field Work 141,Research & Development,Research Scientist,Python,High,47,Low,Short,Non-critical
+T_1142,Project Administrative 142,Sales,Manager,Leadership,Low,5,Low,Midterm,Non-critical
+T_1143,Project Analysis 143,Research & Development,Healthcare Representative,"Patient Communication, Medical Knowledge",Medium,17,Low,Long,Non-critical
+T_1144,Project Field Work 144,Sales,Sales Representative,"Lead Generation, Customer Service",Low,2,Medium,Midterm,Non-critical
+T_1145,Project Development 145,Sales,Sales Representative,Lead Generation,High,45,Medium,Midterm,Critical
+T_1146,Project Administrative 146,Research & Development,Manufacturing Director,"Lean Six Sigma, Supply Chain",High,61,High,Short,Non-critical
+T_1147,Project Strategic 147,Research & Development,Laboratory Technician,Sample Prep,Medium,35,Medium,Midterm,Non-critical
+T_1148,Project Development 148,Research & Development,Research Scientist,Python,Medium,21,Low,Midterm,Critical
+T_1149,Project Analysis 149,Research & Development,Laboratory Technician,"Equipment Calibration, Safety Protocols",Medium,24,Medium,Short,Critical
+T_1150,Project Administrative 150,Sales,Sales Representative,Lead Generation,Low,5,Low,Midterm,Critical
+T_1151,Project Analysis 151,Human Resources,Human Resources,Employee Relations,High,71,Medium,Midterm,Critical
+T_1152,Project Development 152,Sales,Sales Representative,"Cold Calling, Lead Generation",High,78,Medium,Long,Non-critical
+T_1153,Project Support 153,Research & Development,Research Scientist,"Laboratory Work, Scientific Writing",Medium,38,High,Long,Non-critical
+T_1154,Project Support 154,Sales,Manager,"Budgeting, Strategic Planning",Low,5,Low,Midterm,Non-critical
+T_1155,Project Analysis 155,Sales,Sales Representative,Customer Service,Low,3,Low,Short,Critical
+T_1156,Project Strategic 156,Human Resources,Human Resources,"Recruitment, Employee Relations",Low,4,Medium,Midterm,Non-critical
+T_1157,Project Support 157,Research & Development,Healthcare Representative,Patient Communication,Low,5,Low,Long,Critical
+T_1158,Project Administrative 158,Sales,Sales Representative,Customer Service,Low,8,Low,Long,Critical
+T_1159,Project Administrative 159,Sales,Sales Representative,"Cold Calling, Customer Service",Medium,19,High,Midterm,Critical
+T_1160,Project Administrative 160,Research & Development,Research Director,Project Management,Low,10,High,Short,Critical
+T_1161,Project Support 161,Research & Development,Research Director,Grant Writing,Medium,13,Medium,Midterm,Critical
+T_1162,Project Strategic 162,Human Resources,Human Resources,"Training, Payroll",High,73,Medium,Short,Critical
+T_1163,Project Analysis 163,Sales,Manager,"Budgeting, Conflict Resolution",High,67,Medium,Long,Critical
+T_1164,Project Field Work 164,Research & Development,Laboratory Technician,Sample Prep,Medium,27,High,Short,Non-critical
+T_1165,Project Support 165,Sales,Sales Representative,"Lead Generation, Customer Service",Medium,31,High,Long,Critical
+T_1166,Project Administrative 166,Research & Development,Laboratory Technician,Equipment Calibration,Low,5,Low,Midterm,Critical
+T_1167,Project Field Work 167,Research & Development,Healthcare Representative,"Compliance, Medical Knowledge",Low,6,Medium,Long,Critical
+T_1168,Project Strategic 168,Research & Development,Laboratory Technician,Sample Prep,Low,4,High,Midterm,Non-critical
+T_1169,Project Support 169,Sales,Manager,Leadership,Medium,36,High,Short,Critical
+T_1170,Project Strategic 170,Research & Development,Research Scientist,"Python, Laboratory Work",High,61,Low,Midterm,Non-critical
+T_1171,Project Analysis 171,Sales,Manager,Strategic Planning,Medium,20,Medium,Short,Critical
+T_1172,Project Field Work 172,Research & Development,Laboratory Technician,"Equipment Calibration, Safety Protocols",Low,5,High,Long,Non-critical
+T_1173,Project Development 173,Research & Development,Laboratory Technician,"Safety Protocols, Sample Prep",Low,3,Low,Midterm,Non-critical
+T_1174,Project Analysis 174,Research & Development,Research Scientist,"Data Analysis, Scientific Writing",High,44,Medium,Long,Critical
+T_1175,Project Development 175,Sales,Sales Representative,"Cold Calling, Customer Service",High,41,Low,Long,Critical
+T_1176,Project Administrative 176,Sales,Manager,"Leadership, Strategic Planning",Medium,11,High,Short,Non-critical
+T_1177,Project Strategic 177,Sales,Sales Executive,"Market Analysis, Negotiation",High,94,Medium,Midterm,Critical
+T_1178,Project Strategic 178,Research & Development,Research Director,"Advanced R&D, Grant Writing",High,98,High,Midterm,Critical
+T_1179,Project Development 179,Research & Development,Research Scientist,"Laboratory Work, Python",Low,8,Medium,Short,Critical
+T_1180,Project Analysis 180,Sales,Sales Representative,"Lead Generation, Cold Calling",Medium,36,High,Midterm,Non-critical
+T_1181,Project Field Work 181,Research & Development,Healthcare Representative,"Medical Knowledge, Patient Communication",Medium,26,High,Short,Non-critical
+T_1182,Project Support 182,Research & Development,Research Scientist,Python,Low,5,High,Short,Non-critical
+T_1183,Project Strategic 183,Sales,Manager,Leadership,High,79,Medium,Short,Non-critical
+T_1184,Project Administrative 184,Sales,Sales Representative,Cold Calling,Low,8,High,Midterm,Critical
+T_1185,Project Analysis 185,Sales,Sales Representative,"Lead Generation, Customer Service",High,77,Medium,Long,Non-critical
+T_1186,Project Administrative 186,Sales,Manager,"Strategic Planning, Leadership",High,89,High,Short,Critical
+T_1187,Project Administrative 187,Research & Development,Laboratory Technician,"Equipment Calibration, Sample Prep",Medium,27,Medium,Long,Non-critical
+T_1188,Project Field Work 188,Research & Development,Healthcare Representative,Medical Knowledge,Low,4,Medium,Midterm,Critical
+T_1189,Project Strategic 189,Research & Development,Laboratory Technician,"Equipment Calibration, Sample Prep",Low,10,High,Long,Critical
+T_1190,Project Support 190,Research & Development,Research Director,Grant Writing,Medium,30,Low,Long,Critical
+T_1191,Project Support 191,Research & Development,Laboratory Technician,"Equipment Calibration, Sample Prep",High,61,High,Midterm,Non-critical
+T_1192,Project Administrative 192,Research & Development,Research Scientist,Data Analysis,Low,10,Medium,Long,Non-critical
+T_1193,Project Administrative 193,Research & Development,Research Scientist,"Laboratory Work, Data Analysis",Medium,32,High,Long,Critical
+T_1194,Project Field Work 194,Research & Development,Research Scientist,"Python, Laboratory Work",High,95,High,Long,Non-critical
+T_1195,Project Support 195,Research & Development,Research Director,"Project Management, Advanced R&D",Medium,15,High,Long,Non-critical
+T_1196,Project Development 196,Sales,Sales Executive,Market Analysis,Medium,21,High,Long,Critical
+T_1197,Project Strategic 197,Sales,Manager,"Conflict Resolution, Leadership",High,86,High,Long,Non-critical
+T_1198,Project Strategic 198,Human Resources,Human Resources,Employee Relations,High,65,High,Long,Non-critical
+T_1199,Project Development 199,Sales,Manager,Leadership,Low,4,Low,Short,Critical
+T_1200,Project Analysis 200,Sales,Sales Representative,"Cold Calling, Lead Generation",Medium,31,High,Midterm,Non-critical

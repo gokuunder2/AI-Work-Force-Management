@@ -1,0 +1,16 @@
+# Environments
+myenv/
+venv/
+env/
+.env
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Data (Optional: use this if your CSVs are very large)
+# data/*.csv
+
+# OS files
+.DS_Store
+Thumbs.db
