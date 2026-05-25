@@ -8,7 +8,7 @@ from task_allocation_engine import get_top_3_recommendations
 
 
 # Configuration
-API_URL = "http://127.0.0.1:8000"
+API_URL = "http://0.0.0:8000"
 
 st.set_page_config(page_title="AI Workforce Manager", layout="wide")
 st.title("📊 AI Workforce Management Dashboard")

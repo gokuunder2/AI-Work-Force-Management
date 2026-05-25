@@ -17,11 +17,11 @@ The project is organized into a modular structure for scalability:
 1. **Install Dependencies:**
    ```bash
    pip install -r requirements.txt
-2. **Run the Backemd:**
+2. **Run the Backemd:**s
    ```bash
-   pip install -r requirements.txt
+   uvicorn SRC.app:app --reload
 2. **Launch the UI:**
    ```bash
-   streamlit run SRC.dashboard.py
+   streamlit run SRC/dashboard.py
 
       

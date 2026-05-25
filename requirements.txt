@@ -1,8 +1,16 @@
+# Web Frameworks
 fastapi
 uvicorn
-joblib
+streamlit
+
+# Data Science & Machine Learning
 pandas
 numpy
 scikit-learn
-pydantic
-matplotlib
+scipy
+joblib
+
+# NLP & Utilities
+python-multipart
+requests
+python-dotenv

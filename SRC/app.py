@@ -6,7 +6,8 @@ from pydantic import BaseModel
 import sqlite3
 
 # Import functions from your allocation engine
-from task_allocation_engine import run_allocation, get_top_3_recommendations
+# ✅ CORRECT
+from SRC.task_allocation_engine import run_allocation, get_top_3_recommendations
 
 # --- 1. DATABASE INITIALIZATION ---
 def init_db():
