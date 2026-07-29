@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Attrition Predictor | AI Workforce Management</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono&amp;display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        input[type='range'] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        input[type='range']::-webkit-slider-runnable-track {
+            background: #30363d;
+            height: 4px;
+            border-radius: 2px;
+        }
+
+        input[type='range']::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            margin-top: -6px;
+            background-color: #ef4444;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+        }
+
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+    </style>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-variant": "#2d363e",
+                        "surface-container-high": "#222b33",
+                        "on-tertiary-fixed-variant": "#00504e",
+                        "primary-fixed-dim": "#ffb3ad",
+                        "background": "#0b141c",
+                        "on-error-container": "#ffdad6",
+                        "outline": "#ab8986",
+                        "tertiary": "#69d8d4",
+                        "surface-container-lowest": "#060f16",
+                        "on-tertiary-container": "#00302e",
+                        "on-secondary": "#002e6a",
+                        "on-primary": "#68000a",
+                        "inverse-surface": "#dae3ee",
+                        "surface": "#0b141c",
+                        "surface-dim": "#0b141c",
+                        "surface-container-low": "#141c24",
+                        "on-surface-variant": "#e4beba",
+                        "tertiary-fixed-dim": "#69d8d4",
+                        "secondary-container": "#0566d9",
+                        "on-secondary-fixed-variant": "#004395",
+                        "error": "#ffb4ab",
+                        "primary": "#ffb3ad",
+                        "on-background": "#dae3ee",
+                        "on-error": "#690005",
+                        "tertiary-fixed": "#87f4f0",
+                        "on-tertiary": "#003736",
+                        "surface-tint": "#ffb3ad",
+                        "on-primary-container": "#5c0008",
+                        "outline-variant": "#5b403e",
+                        "surface-container": "#182028",
+                        "surface-container-highest": "#2d363e",
+                        "surface-bright": "#313a43",
+                        "on-secondary-fixed": "#001a42",
+                        "error-container": "#93000a",
+                        "on-surface": "#dae3ee",
+                        "inverse-primary": "#b91a24",
+                        "tertiary-container": "#24a09d",
+                        "on-primary-fixed-variant": "#930013",
+                        "on-primary-fixed": "#410004",
+                        "inverse-on-surface": "#29313a",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "on-tertiary-fixed": "#00201f",
+                        "on-secondary-container": "#e6ecff",
+                        "secondary": "#adc6ff",
+                        "secondary-fixed": "#d8e2ff",
+                        "primary-fixed": "#ffdad7",
+                        "primary-container": "#ff5451"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "md": "16px",
+                        "sm": "12px",
+                        "base": "4px",
+                        "lg": "24px",
+                        "margin": "24px",
+                        "gutter": "16px",
+                        "xs": "8px",
+                        "xl": "32px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "mono-sm": ["JetBrains Mono"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "mono-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+
+<body class="bg-background text-on-background font-body-md selection:bg-primary/30">
+    <div class="flex min-h-screen">
+        <!-- SideNavBar Component -->
+        <aside
+            class="hidden md:flex flex-col h-screen sticky top-0 bg-surface-container border-r border-outline-variant w-64">
+            <div class="p-lg">
+                <h1 class="font-headline-sm text-headline-sm text-primary">AI Workforce</h1>
+                <p class="text-on-surface-variant font-label-md text-label-md opacity-70">Management Dashboard</p>
+            </div>
+            <nav class="flex-1 mt-md">
+                <ul class="space-y-base">
+                    <li class="px-md">
+                        <a class="flex items-center gap-sm px-sm py-md text-primary font-bold border-r-4 border-primary bg-primary/10 transition-all duration-150 ease-in-out"
+                            href="/">
+                            <span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+                            <span class="font-label-md text-label-md">Attrition Predictor</span>
+                        </a>
+                    </li>
+                    <li class="px-md">
+                        <a class="flex items-center gap-sm px-sm py-md text-on-surface-variant hover:bg-surface-variant transition-all duration-150 ease-in-out"
+                            href="#">
+                            <span class="material-symbols-outlined" data-icon="folder_shared">folder_shared</span>
+                            <span class="font-label-md text-label-md">Custom Dataset Workspace</span>
+                        </a>
+                    </li>
+                    <li class="px-md">
+                        <a class="flex items-center gap-sm px-sm py-md text-on-surface-variant hover:bg-surface-variant transition-all duration-150 ease-in-out"
+                            href="#">
+                            <span class="material-symbols-outlined" data-icon="database">database</span>
+                            <span class="font-label-md text-label-md">Live Database</span>
+                        </a>
+                    </li>
+                    <li class="px-md">
+                        <a class="flex items-center gap-sm px-sm py-md text-on-surface-variant hover:bg-surface-variant transition-all duration-150 ease-in-out"
+                            href="#">
+                            <span class="material-symbols-outlined"
+                                data-icon="settings_applications">settings_applications</span>
+                            <span class="font-label-md text-label-md">Internal Bulk Engine</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="p-lg mt-auto border-t border-outline-variant flex items-center gap-sm">
+                <div class="w-8 h-8 rounded-full overflow-hidden bg-surface-variant">
+                    <img class="w-full h-full object-cover" data-alt="Admin avatar"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPurWk3Qd-z52Nmq0VnjNV37vsFjgutiBo1SDrwvZ1_oUWWLu0y64hg94bheTR8E7q92WkrKVdmBBDG24tTs1RKnNURNLs6iCbaY0gd9mG6wFHu3Qk_8IjaVoe7JYHAnrV4yKmaNLGr6BUrKGOBRhOQ26NLt4Llk-eb7EPHSIMlV-XThchDfONr4ycneeLbQAKQfDRUwjEWAgxm4_JIGRlRvI2pjUEO5pOHBz1FtlKfhhT4tDqAvMw">
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-label-md text-label-md font-bold">Admin Ops</span>
+                    <span class="text-[10px] text-on-surface-variant uppercase tracking-widest">Active Session</span>
+                </div>
+            </div>
+        </aside>
+        <!-- Main Content Canvas -->
+        <main class="flex-1 flex flex-col min-w-0 bg-background">
+            <!-- TopNavBar Component -->
+            <header
+                class="flex justify-between items-center w-full px-margin h-16 bg-background border-b border-outline-variant sticky top-0 z-10">
+                <div class="flex items-center gap-lg">
+                    <div class="md:hidden">
+                        <span class="material-symbols-outlined text-on-background" data-icon="menu">menu</span>
+                    </div>
+                    <span class="font-headline-sm text-headline-sm font-bold text-on-background">Predict Employee
+                        Attrition</span>
+                </div>
+                <div class="flex items-center gap-md">
+                    <div class="hidden lg:flex items-center gap-md text-on-surface-variant"><a
+                            class="hover:text-primary transition-colors duration-200 font-body-md text-body-md"
+                            href="#">Models</a>
+                        <a class="hover:text-primary transition-colors duration-200 font-body-md text-body-md"
+                            href="#">API Logs</a>
+                        <a class="text-primary border-b-2 border-primary font-body-md text-body-md"
+                            href="#">Deployment</a>
+                    </div>
+                    <div class="flex items-center gap-xs ml-lg">
+                        <button
+                            class="p-xs text-on-surface-variant hover:text-primary transition-colors hover:bg-surface-variant">
+                            <span class="material-symbols-outlined" data-icon="bar_chart">bar_chart</span>
+                        </button>
+                        <button
+                            class="p-xs text-on-surface-variant hover:text-primary transition-colors hover:bg-surface-variant">
+                            <span class="material-symbols-outlined" data-icon="link">link</span>
+                        </button>
+                        <button
+                            class="p-xs text-on-surface-variant hover:text-primary transition-colors hover:bg-surface-variant">
+                            <span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+                        </button>
+                    </div>
+                    <button
+                        class="ml-md px-lg py-xs bg-primary-container text-on-primary-container rounded font-bold hover:opacity-80 active:scale-95 transition-all hover:opacity-100">
+                        Deploy
+                    </button>
+                </div>
+            </header>
+            <!-- Dashboard Content -->
+            <div class="p-margin max-w-6xl w-full mx-auto">
+                <!-- Connection status banner -->
+                <div id="connectionBanner" class="mb-md px-md py-sm rounded border text-xs font-mono hidden"></div>
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-lg">
+                    <!-- Form Container -->
+                    <div class="md:col-span-12 lg:col-span-8">
+                        <div class="bg-surface-container border border-outline-variant rounded-lg overflow-hidden">
+                            <div
+                                class="px-lg py-md border-b border-outline-variant bg-surface-container-high/50 flex justify-between items-center">
+                                <h2 class="font-headline-sm text-headline-sm">Input Parameters</h2>
+                                <span
+                                    class="bg-primary/10 text-primary border border-primary/20 px-sm py-1 rounded text-[10px] font-mono tracking-tighter">ENGINE:
+                                    XGBOOST-V4.2</span>
+                            </div>
+                            <form class="p-lg grid grid-cols-1 md:grid-cols-2 gap-x-xl gap-y-lg" id="attritionForm">
+                                <!-- Left Column -->
+                                <div class="space-y-lg">
+                                    <!-- Employee ID -->
+                                    <div class="space-y-xs">
+                                        <label class="font-label-md text-label-md text-on-surface-variant">Employee
+                                            ID</label>
+                                        <div
+                                            class="flex items-center bg-surface-container-low border border-outline-variant focus-within:border-primary transition-colors rounded overflow-hidden">
+                                            <input
+                                                class="w-full bg-transparent border-none text-on-background px-md py-sm focus:ring-0 font-mono-sm text-mono-sm"
+                                                id="employeeId" type="number" value="1024">
+                                            <div class="flex flex-col border-l border-outline-variant">
+                                                <button
+                                                    class="px-xs hover:bg-surface-variant text-on-surface-variant border-b border-outline-variant"
+                                                    data-target="employeeId" data-step="1" type="button"><span
+                                                        class="material-symbols-outlined text-sm"
+                                                        style="font-size: 16px;">expand_less</span></button>
+                                                <button class="px-xs hover:bg-surface-variant text-on-surface-variant"
+                                                    data-target="employeeId" data-step="-1" type="button"><span
+                                                        class="material-symbols-outlined text-sm"
+                                                        style="font-size: 16px;">expand_more</span></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Age -->
+                                    <div class="space-y-xs">
+                                        <label class="font-label-md text-label-md text-on-surface-variant">Age</label>
+                                        <div
+                                            class="flex items-center bg-surface-container-low border border-outline-variant focus-within:border-primary transition-colors rounded overflow-hidden">
+                                            <input
+                                                class="w-full bg-transparent border-none text-on-background px-md py-sm focus:ring-0 font-mono-sm text-mono-sm"
+                                                id="age" type="number" value="34">
+                                            <div class="flex flex-col border-l border-outline-variant">
+                                                <button
+                                                    class="px-xs hover:bg-surface-variant text-on-surface-variant border-b border-outline-variant"
+                                                    data-target="age" data-step="1" type="button"><span
+                                                        class="material-symbols-outlined text-sm"
+                                                        style="font-size: 16px;">expand_less</span></button>
+                                                <button class="px-xs hover:bg-surface-variant text-on-surface-variant"
+                                                    data-target="age" data-step="-1" type="button"><span
+                                                        class="material-symbols-outlined text-sm"
+                                                        style="font-size: 16px;">expand_more</span></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Gender -->
+                                    <div class="space-y-xs">
+                                        <label
+                                            class="font-label-md text-label-md text-on-surface-variant">Gender</label>
+                                        <div class="relative">
+                                            <select
+                                                class="w-full bg-surface-container-low border border-outline-variant text-on-background px-md py-sm focus:ring-0 focus:border-primary rounded appearance-none font-body-md text-body-md"
+                                                id="gender">
+                                                <option>Male</option>
+                                                <option>Female</option>
+                                            </select>
+                                            <span
+                                                class="material-symbols-outlined absolute right-md top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">keyboard_arrow_down</span>
+                                        </div>
+                                    </div>
+                                    <!-- Marital Status -->
+                                    <div class="space-y-xs">
+                                        <label class="font-label-md text-label-md text-on-surface-variant">Marital
+                                            Status</label>
+                                        <div class="relative">
+                                            <select
+                                                class="w-full bg-surface-container-low border border-outline-variant text-on-background px-md py-sm focus:ring-0 focus:border-primary rounded appearance-none font-body-md text-body-md"
+                                                id="maritalStatus">
+                                                <option>Single</option>
+                                                <option>Married</option>
+                                                <option>Divorced</option>
+                                            </select>
+                                            <span
+                                                class="material-symbols-outlined absolute right-md top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">keyboard_arrow_down</span>
+                                        </div>
+                                    </div>
+                                    <!-- Department -->
+                                    <div class="space-y-xs">
+                                        <label
+                                            class="font-label-md text-label-md text-on-surface-variant">Department</label>
+                                        <div class="relative">
+                                            <select
+                                                class="w-full bg-surface-container-low border border-outline-variant text-on-background px-md py-sm focus:ring-0 focus:border-primary rounded appearance-none font-body-md text-body-md"
+                                                id="department">
+                                                <option>Research &amp; Development</option>
+                                                <option>Human Resources</option>
+                                                <option>Sales &amp; Marketing</option>
+                                                <option>Information Technology</option>
+                                            </select>
+                                            <span
+                                                class="material-symbols-outlined absolute right-md top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">keyboard_arrow_down</span>
+                                        </div>
+                                    </div>
+                                    <!-- Business Travel -->
+                                    <div class="space-y-xs">
+                                        <label class="font-label-md text-label-md text-on-surface-variant">Business
+                                            Travel</label>
+                                        <div class="relative">
+                                            <select
+                                                class="w-full bg-surface-container-low border border-outline-variant text-on-background px-md py-sm focus:ring-0 focus:border-primary rounded appearance-none font-body-md text-body-md"
+                                                id="businessTravel">
+                                                <option value="Travel_Rarely">Travel Rarely</option>
+                                                <option value="Travel_Frequently">Travel Frequently</option>
+                                                <option value="Non-Travel">Non-Travel</option>
+                                            </select>
+                                            <span
+                                                class="material-symbols-outlined absolute right-md top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">keyboard_arrow_down</span>
+                                        </div>
+                                    </div>
+                                    <!-- Distance From Home -->
+                                    <div class="space-y-xs">
+                                        <label class="font-label-md text-label-md text-on-surface-variant">Distance
+                                            From Home (miles)</label>
+                                        <div
+                                            class="flex items-center bg-surface-container-low border border-outline-variant focus-within:border-primary transition-colors rounded overflow-hidden">
+                                            <input
+                                                class="w-full bg-transparent border-none text-on-background px-md py-sm focus:ring-0 font-mono-sm text-mono-sm"
+                                                id="distanceFromHome" type="number" value="8">
+                                            <div class="flex flex-col border-l border-outline-variant">
+                                                <button
+                                                    class="px-xs hover:bg-surface-variant text-on-surface-variant border-b border-outline-variant"
+                                                    data-target="distanceFromHome" data-step="1" type="button"><span
+                                                        class="material-symbols-outlined text-sm"
+                                                        style="font-size: 16px;">expand_less</span></button>
+                                                <button class="px-xs hover:bg-surface-variant text-on-surface-variant"
+                                                    data-target="distanceFromHome" data-step="-1" type="button"><span
+                                                        class="material-symbols-outlined text-sm"
+                                                        style="font-size: 16px;">expand_more</span></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Education -->
+                                    <div class="space-y-xs">
+                                        <label class="font-label-md text-label-md text-on-surface-variant">Education
+                                            Level (1-5)</label>
+                                        <div
+                                            class="flex items-center bg-surface-container-low border border-outline-variant focus-within:border-primary transition-colors rounded overflow-hidden">
+                                            <input
+                                                class="w-full bg-transparent border-none text-on-background px-md py-sm focus:ring-0 font-mono-sm text-mono-sm"
+                                                id="education" max="5" min="1" type="number" value="3">
+                                            <div class="flex flex-col border-l border-outline-variant">
+                                                <button
+                                                    class="px-xs hover:bg-surface-variant text-on-surface-variant border-b border-outline-variant"
+                                                    data-target="education" data-step="1" type="button"><span
+                                                        class="material-symbols-outlined text-sm"
+                                                        style="font-size: 16px;">expand_less</span></button>
+                                                <button class="px-xs hover:bg-surface-variant text-on-surface-variant"
+                                                    data-target="education" data-step="-1" type="button"><span
+                                                        class="material-symbols-outlined text-sm"
+                                                        style="font-size: 16px;">expand_more</span></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Education Field -->
+                                    <div class="space-y-xs">
+                                        <label class="font-label-md text-label-md text-on-surface-variant">Education
+                                            Field</label>
+                                        <div class="relative">
+                                            <select
+                                                class="w-full bg-surface-container-low border border-outline-variant text-on-background px-md py-sm focus:ring-0 focus:border-primary rounded appearance-none font-body-md text-body-md"
+                                                id="educationField">
+                                                <option>Life Sciences</option>
+                                                <option>Medical</option>
+                                                <option>Marketing</option>
+                                                <option>Technical Degree</option>
+                                                <option>Human Resources</option>
+                                                <option>Other</option>
+                                            </select>
+                                            <span
+                                                class="material-symbols-outlined absolute right-md top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">keyboard_arrow_down</span>
+                                        </div>
+                                    </div>
+                                    <!-- Job Level Slider -->
+                                    <div class="space-y-sm pt-xs">
+                                        <div class="flex justify-between items-center">
+                                            <label class="font-label-md text-label-md text-on-surface-variant">Job
+                                                Level</label>
+                                            <span
+                                                class="font-mono-sm text-mono-sm text-primary bg-primary/10 px-xs py-0.5 rounded border border-primary/20"
+                                                id="jobLevelVal">3</span>
+                                        </div>
+                                        <input class="w-full" id="jobLevel" max="5" min="1"
+                                            oninput="document.getElementById('jobLevelVal').innerText = this.value"
+                                            step="1" type="range" value="3">
+                                        <div
+                                            class="flex justify-between text-[10px] text-on-surface-variant opacity-50 px-1">
+                                            <span class="">J1</span>
+                                            <span class="">J2</span>
+                                            <span class="">J3</span>
+                                            <span class="">J4</span>
+                                            <span class="">J5</span>
+                                        </div>
+                                    </div>
+                                    <!-- Job Involvement -->
+                                    <div class="space-y-xs">
+                                        <label class="font-label-md text-label-md text-on-surface-variant">Job
+                                            Involvement (1-4)</label>
+                                        <div
+                                            class="flex items-center bg-surface-container-low border border-outline-variant focus-within:border-primary transition-colors rounded overflow-hidden">
+                                            <input
+                                                class="w-full bg-transparent border-none text-on-background px-md py-sm focus:ring-0 font-mono-sm text-mono-sm"
+                                                id="jobInvolvement" max="4" min="1" type="number" value="3">
+                                            <div class="flex flex-col border-l border-outline-variant">
+                                                <button
+                                                    class="px-xs hover:bg-surface-variant text-on-surface-variant border-b border-outline-variant"
+                                                    data-target="jobInvolvement" data-step="1" type="button"><span
+                                                        class="material-symbols-outlined text-sm"
+                                                        style="font-size: 16px;">expand_less</span></button>
+                                                <button class="px-xs hover:bg-surface-variant text-on-surface-variant"
+                                                    data-target="jobInvolvement" data-step="-1" type="button"><span
+                                                        class="material-symbols-outlined text-sm"
+                                                        style="font-size: 16px;">expand_more</span></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Job Satisfaction -->
+                                    <div class="space-y-xs">
+                                        <label class="font-label-md text-label-md text-on-surface-variant">Job
+                                            Satisfaction (1-4)</label>
+                                        <div
+                                            class="flex items-center bg-surface-container-low border border-outline-variant focus-within:border-primary transition-colors rounded overflow-hidden">
+                                            <input
+                                                class="w-full bg-transparent border-none text-on-background px-md py-sm focus:ring-0 font-mono-sm text-mono-sm"
+                                                id="jobSatisfaction" max="4" min="1" type="number" value="3">
+                                            <div class="flex flex-col border-l border-outline-variant">
+                                                <button
+                                                    class="px-xs hover:bg-surface-variant text-on-surface-variant border-b border-outline-variant"
+                                                    data-target="jobSatisfaction" data-step="1" type="button"><span
+                                                        class="material-symbols-outlined text-sm"
+                                                        style="font-size: 16px;">expand_less</span></button>
+                                                <button class="px-xs hover:bg-surface-variant text-on-surface-variant"
+                                                    data-target="jobSatisfaction" data-step="-1" type="button"><span
+                                                        class="material-symbols-outlined text-sm"
+                                                        style="font-size: 16px;">expand_more</span></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Environment Satisfaction -->
+                                    <div class="space-y-xs">
+                                        <label class="font-label-md text-label-md text-on-surface-variant">Environment
+                                            Satisfaction (1-4)</label>
+                                        <div
+                                            class="flex items-center bg-surface-container-low border border-outline-variant focus-within:border-primary transition-colors rounded overflow-hidden">
+                                            <input
+                                                class="w-full bg-transparent border-none text-on-background px-md py-sm focus:ring-0 font-mono-sm text-mono-sm"
+                                                id="environmentSatisfaction" max="4" min="1" type="number" value="3">
+                                            <div class="flex flex-col border-l border-outline-variant">
+                                                <button
+                                                    class="px-xs hover:bg-surface-variant text-on-surface-variant border-b border-outline-variant"
+                                                    data-target="environmentSatisfaction" data-step="1"
+                                                    type="button"><span class="material-symbols-outlined text-sm"
+                                                        style="font-size: 16px;">expand_less</span></button>
+                                                <button class="px-xs hover:bg-surface-variant text-on-surface-variant"
+                                                    data-target="environmentSatisfaction" data-step="-1"
+                                                    type="button"><span class="material-symbols-outlined text-sm"
+                                                        style="font-size: 16px;">expand_more</span></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Relationship Satisfaction -->
+                                    <div class="space-y-xs">
+                                        <label class="font-label-md text-label-md text-on-surface-variant">Relationship
+                                            Satisfaction (1-4)</label>
+                                        <div
+                                            class="flex items-center bg-surface-container-low border border-outline-variant focus-within:border-primary transition-colors rounded overflow-hidden">
+                                            <input
+                                                class="w-full bg-transparent border-none text-on-background px-md py-sm focus:ring-0 font-mono-sm text-mono-sm"
+                                                id="relationshipSatisfaction" max="4" min="1" type="number" value="3">
+                                            <div class="flex flex-col border-l border-outline-variant">
+                                                <button
+                                                    class="px-xs hover:bg-surface-variant text-on-surface-variant border-b border-outline-variant"
+                                                    data-target="relationshipSatisfaction" data-step="1"
+                                                    type="button"><span class="material-symbols-outlined text-sm"
+                                                        style="font-size: 16px;">expand_less</span></button>
+                                                <button class="px-xs hover:bg-surface-variant text-on-surface-variant"
+                                                    data-target="relationshipSatisfaction" data-step="-1"
+                                                    type="button"><span class="material-symbols-outlined text-sm"
+                                                        style="font-size: 16px;">expand_more</span></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Work Life Balance -->
+                                    <div class="space-y-xs">
+                                        <label class="font-label-md text-label-md text-on-surface-variant">Work Life
+                                            Balance (1-4)</label>
+                                        <div
+                                            class="flex items-center bg-surface-container-low border border-outline-variant focus-within:border-primary transition-colors rounded overflow-hidden">
+                                            <input
+                                                class="w-full bg-transparent border-none text-on-background px-md py-sm focus:ring-0 font-mono-sm text-mono-sm"
+                                                id="workLifeBalance" max="4" min="1" type="number" value="3">
+                                            <div class="flex flex-col border-l border-outline-variant">
+                                                <button
+                                                    class="px-xs hover:bg-surface-variant text-on-surface-variant border-b border-outline-variant"
+                                                    data-target="workLifeBalance" data-step="1" type="button"><span
+                                                        class="material-symbols-outlined text-sm"
+                                                        style="font-size: 16px;">expand_less</span></button>
+                                                <button class="px-xs hover:bg-surface-variant text-on-surface-variant"
+                                                    data-target="workLifeBalance" data-step="-1" type="button"><span
+                                                        class="material-symbols-outlined text-sm"
+                                                        style="font-size: 16px;">expand_more</span></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Stock Option Level -->
+                                    <div class="space-y-xs">
+                                        <label class="font-label-md text-label-md text-on-surface-variant">Stock Option
+                                            Level (0-3)</label>
+                                        <div
+                                            class="flex items-center bg-surface-container-low border border-outline-variant focus-within:border-primary transition-colors rounded overflow-hidden">
+                                            <input
+                                                class="w-full bg-transparent border-none text-on-background px-md py-sm focus:ring-0 font-mono-sm text-mono-sm"
+                                                id="stockOptionLevel" max="3" min="0" type="number" value="1">
+                                            <div class="flex flex-col border-l border-outline-variant">
+                                                <button
+                                                    class="px-xs hover:bg-surface-variant text-on-surface-variant border-b border-outline-variant"
+                                                    data-target="stockOptionLevel" data-step="1" type="button"><span
+                                                        class="material-symbols-outlined text-sm"
+                                                        style="font-size: 16px;">expand_less</span></button>
+                                                <button class="px-xs hover:bg-surface-variant text-on-surface-variant"
+                                                    data-target="stockOptionLevel" data-step="-1" type="button"><span
+                                                        class="material-symbols-outlined text-sm"
+                                                        style="font-size: 16px;">expand_more</span></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Right Column -->
+                                <div class="space-y-lg">
+                                    <!-- Monthly Income -->
+                                    <div class="space-y-xs">
+                                        <label class="font-label-md text-label-md text-on-surface-variant">Monthly
+                                            Income ($)</label>
+                                        <div
+                                            class="flex items-center bg-surface-container-low border border-outline-variant focus-within:border-primary transition-colors rounded overflow-hidden">
+                                            <input
+                                                class="w-full bg-transparent border-none text-on-background px-md py-sm focus:ring-0 font-mono-sm text-mono-sm"
+                                                id="monthlyIncome" type="number" value="7500">
+                                            <div class="flex flex-col border-l border-outline-variant">
+                                                <button
+                                                    class="px-xs hover:bg-surface-variant text-on-surface-variant border-b border-outline-variant"
+                                                    data-target="monthlyIncome" data-step="100" type="button"><span
+                                                        class="material-symbols-outlined text-sm"
+                                                        style="font-size: 16px;">expand_less</span></button>
+                                                <button class="px-xs hover:bg-surface-variant text-on-surface-variant"
+                                                    data-target="monthlyIncome" data-step="-100" type="button"><span
+                                                        class="material-symbols-outlined text-sm"
+                                                        style="font-size: 16px;">expand_more</span></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Daily Rate -->
+                                    <div class="space-y-xs">
+                                        <label class="font-label-md text-label-md text-on-surface-variant">Daily Rate
+                                            ($)</label>
+                                        <div
+                                            class="flex items-center bg-surface-container-low border border-outline-variant focus-within:border-primary transition-colors rounded overflow-hidden">
+                                            <input
+                                                class="w-full bg-transparent border-none text-on-background px-md py-sm focus:ring-0 font-mono-sm text-mono-sm"
+                                                id="dailyRate" type="number" value="800">
+                                            <div class="flex flex-col border-l border-outline-variant">
+                                                <button
+                                                    class="px-xs hover:bg-surface-variant text-on-surface-variant border-b border-outline-variant"
+                                                    data-target="dailyRate" data-step="10" type="button"><span
+                                                        class="material-symbols-outlined text-sm"
+                                                        style="font-size: 16px;">expand_less</span></button>
+                                                <button class="px-xs hover:bg-surface-variant text-on-surface-variant"
+                                                    data-target="dailyRate" data-step="-10" type="button"><span
+                                                        class="material-symbols-outlined text-sm"
+                                                        style="font-size: 16px;">expand_more</span></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Percent Salary Hike -->
+                                    <div class="space-y-xs">
+                                        <label class="font-label-md text-label-md text-on-surface-variant">Percent
+                                            Salary Hike (%)</label>
+                                        <div
+                                            class="flex items-center bg-surface-container-low border border-outline-variant focus-within:border-primary transition-colors rounded overflow-hidden">
+                                            <input
+                                                class="w-full bg-transparent border-none text-on-background px-md py-sm focus:ring-0 font-mono-sm text-mono-sm"
+                                                id="percentSalaryHike" type="number" value="14">
+                                            <div class="flex flex-col border-l border-outline-variant">
+                                                <button
+                                                    class="px-xs hover:bg-surface-variant text-on-surface-variant border-b border-outline-variant"
+                                                    data-target="percentSalaryHike" data-step="1" type="button"><span
+                                                        class="material-symbols-outlined text-sm"
+                                                        style="font-size: 16px;">expand_less</span></button>
+                                                <button class="px-xs hover:bg-surface-variant text-on-surface-variant"
+                                                    data-target="percentSalaryHike" data-step="-1" type="button"><span
+                                                        class="material-symbols-outlined text-sm"
+                                                        style="font-size: 16px;">expand_more</span></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Number of Companies Worked -->
+                                    <div class="space-y-xs">
+                                        <label class="font-label-md text-label-md text-on-surface-variant"># Companies
+                                            Worked</label>
+                                        <div
+                                            class="flex items-center bg-surface-container-low border border-outline-variant focus-within:border-primary transition-colors rounded overflow-hidden">
+                                            <input
+                                                class="w-full bg-transparent border-none text-on-background px-md py-sm focus:ring-0 font-mono-sm text-mono-sm"
+                                                id="numCompaniesWorked" type="number" value="2">
+                                            <div class="flex flex-col border-l border-outline-variant">
+                                                <button
+                                                    class="px-xs hover:bg-surface-variant text-on-surface-variant border-b border-outline-variant"
+                                                    data-target="numCompaniesWorked" data-step="1" type="button"><span
+                                                        class="material-symbols-outlined text-sm"
+                                                        style="font-size: 16px;">expand_less</span></button>
+                                                <button class="px-xs hover:bg-surface-variant text-on-surface-variant"
+                                                    data-target="numCompaniesWorked" data-step="-1" type="button"><span
+                                                        class="material-symbols-outlined text-sm"
+                                                        style="font-size: 16px;">expand_more</span></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Total Working Years -->
+                                    <div class="space-y-xs">
+                                        <label class="font-label-md text-label-md text-on-surface-variant">Total
+                                            Working Years</label>
+                                        <div
+                                            class="flex items-center bg-surface-container-low border border-outline-variant focus-within:border-primary transition-colors rounded overflow-hidden">
+                                            <input
+                                                class="w-full bg-transparent border-none text-on-background px-md py-sm focus:ring-0 font-mono-sm text-mono-sm"
+                                                id="totalWorkingYears" type="number" value="10">
+                                            <div class="flex flex-col border-l border-outline-variant">
+                                                <button
+                                                    class="px-xs hover:bg-surface-variant text-on-surface-variant border-b border-outline-variant"
+                                                    data-target="totalWorkingYears" data-step="1" type="button"><span
+                                                        class="material-symbols-outlined text-sm"
+                                                        style="font-size: 16px;">expand_less</span></button>
+                                                <button class="px-xs hover:bg-surface-variant text-on-surface-variant"
+                                                    data-target="totalWorkingYears" data-step="-1" type="button"><span
+                                                        class="material-symbols-outlined text-sm"
+                                                        style="font-size: 16px;">expand_more</span></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Training Times Last Year -->
+                                    <div class="space-y-xs">
+                                        <label class="font-label-md text-label-md text-on-surface-variant">Training
+                                            Times Last Year</label>
+                                        <div
+                                            class="flex items-center bg-surface-container-low border border-outline-variant focus-within:border-primary transition-colors rounded overflow-hidden">
+                                            <input
+                                                class="w-full bg-transparent border-none text-on-background px-md py-sm focus:ring-0 font-mono-sm text-mono-sm"
+                                                id="trainingTimesLastYear" type="number" value="2">
+                                            <div class="flex flex-col border-l border-outline-variant">
+                                                <button
+                                                    class="px-xs hover:bg-surface-variant text-on-surface-variant border-b border-outline-variant"
+                                                    data-target="trainingTimesLastYear" data-step="1"
+                                                    type="button"><span class="material-symbols-outlined text-sm"
+                                                        style="font-size: 16px;">expand_less</span></button>
+                                                <button class="px-xs hover:bg-surface-variant text-on-surface-variant"
+                                                    data-target="trainingTimesLastYear" data-step="-1"
+                                                    type="button"><span class="material-symbols-outlined text-sm"
+                                                        style="font-size: 16px;">expand_more</span></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Years at Company -->
+                                    <div class="space-y-xs">
+                                        <label class="font-label-md text-label-md text-on-surface-variant">Years at
+                                            Company</label>
+                                        <div
+                                            class="flex items-center bg-surface-container-low border border-outline-variant focus-within:border-primary transition-colors rounded overflow-hidden">
+                                            <input
+                                                class="w-full bg-transparent border-none text-on-background px-md py-sm focus:ring-0 font-mono-sm text-mono-sm"
+                                                id="yearsAtCompany" type="number" value="5">
+                                            <div class="flex flex-col border-l border-outline-variant">
+                                                <button
+                                                    class="px-xs hover:bg-surface-variant text-on-surface-variant border-b border-outline-variant"
+                                                    data-target="yearsAtCompany" data-step="1" type="button"><span
+                                                        class="material-symbols-outlined text-sm"
+                                                        style="font-size: 16px;">expand_less</span></button>
+                                                <button class="px-xs hover:bg-surface-variant text-on-surface-variant"
+                                                    data-target="yearsAtCompany" data-step="-1" type="button"><span
+                                                        class="material-symbols-outlined text-sm"
+                                                        style="font-size: 16px;">expand_more</span></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Years in Current Role -->
+                                    <div class="space-y-xs">
+                                        <label class="font-label-md text-label-md text-on-surface-variant">Years in
+                                            Current Role</label>
+                                        <div
+                                            class="flex items-center bg-surface-container-low border border-outline-variant focus-within:border-primary transition-colors rounded overflow-hidden">
+                                            <input
+                                                class="w-full bg-transparent border-none text-on-background px-md py-sm focus:ring-0 font-mono-sm text-mono-sm"
+                                                id="yearsInCurrentRole" type="number" value="3">
+                                            <div class="flex flex-col border-l border-outline-variant">
+                                                <button
+                                                    class="px-xs hover:bg-surface-variant text-on-surface-variant border-b border-outline-variant"
+                                                    data-target="yearsInCurrentRole" data-step="1" type="button"><span
+                                                        class="material-symbols-outlined text-sm"
+                                                        style="font-size: 16px;">expand_less</span></button>
+                                                <button class="px-xs hover:bg-surface-variant text-on-surface-variant"
+                                                    data-target="yearsInCurrentRole" data-step="-1" type="button"><span
+                                                        class="material-symbols-outlined text-sm"
+                                                        style="font-size: 16px;">expand_more</span></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Years Since Last Promotion -->
+                                    <div class="space-y-xs">
+                                        <label class="font-label-md text-label-md text-on-surface-variant">Years Since
+                                            Last Promotion</label>
+                                        <div
+                                            class="flex items-center bg-surface-container-low border border-outline-variant focus-within:border-primary transition-colors rounded overflow-hidden">
+                                            <input
+                                                class="w-full bg-transparent border-none text-on-background px-md py-sm focus:ring-0 font-mono-sm text-mono-sm"
+                                                id="yearsSinceLastPromotion" type="number" value="1">
+                                            <div class="flex flex-col border-l border-outline-variant">
+                                                <button
+                                                    class="px-xs hover:bg-surface-variant text-on-surface-variant border-b border-outline-variant"
+                                                    data-target="yearsSinceLastPromotion" data-step="1"
+                                                    type="button"><span class="material-symbols-outlined text-sm"
+                                                        style="font-size: 16px;">expand_less</span></button>
+                                                <button class="px-xs hover:bg-surface-variant text-on-surface-variant"
+                                                    data-target="yearsSinceLastPromotion" data-step="-1"
+                                                    type="button"><span class="material-symbols-outlined text-sm"
+                                                        style="font-size: 16px;">expand_more</span></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Years with Current Manager -->
+                                    <div class="space-y-xs">
+                                        <label class="font-label-md text-label-md text-on-surface-variant">Years with
+                                            Current Manager</label>
+                                        <div
+                                            class="flex items-center bg-surface-container-low border border-outline-variant focus-within:border-primary transition-colors rounded overflow-hidden">
+                                            <input
+                                                class="w-full bg-transparent border-none text-on-background px-md py-sm focus:ring-0 font-mono-sm text-mono-sm"
+                                                id="yearsManager" type="number" value="4">
+                                            <div class="flex flex-col border-l border-outline-variant">
+                                                <button
+                                                    class="px-xs hover:bg-surface-variant text-on-surface-variant border-b border-outline-variant"
+                                                    data-target="yearsManager" data-step="1" type="button"><span
+                                                        class="material-symbols-outlined text-sm"
+                                                        style="font-size: 16px;">expand_less</span></button>
+                                                <button class="px-xs hover:bg-surface-variant text-on-surface-variant"
+                                                    data-target="yearsManager" data-step="-1" type="button"><span
+                                                        class="material-symbols-outlined text-sm"
+                                                        style="font-size: 16px;">expand_more</span></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Overtime -->
+                                    <div class="space-y-xs">
+                                        <label class="font-label-md text-label-md text-on-surface-variant">Overtime
+                                            Required</label>
+                                        <div class="flex gap-lg pt-1">
+                                            <label class="flex items-center cursor-pointer group">
+                                                <input class="hidden peer" name="overtime" type="radio" value="Yes">
+                                                <div
+                                                    class="w-5 h-5 rounded-full border-2 border-outline-variant flex items-center justify-center peer-checked:border-primary peer-checked:bg-primary/20 transition-all">
+                                                    <div
+                                                        class="w-2.5 h-2.5 rounded-full bg-primary scale-0 peer-checked:scale-100 transition-transform">
+                                                    </div>
+                                                </div>
+                                                <span
+                                                    class="ml-sm font-body-md text-body-md text-on-surface-variant group-hover:text-on-background transition-colors">Yes</span>
+                                            </label>
+                                            <label class="flex items-center cursor-pointer group">
+                                                <input checked="" class="hidden peer" name="overtime" type="radio"
+                                                    value="No">
+                                                <div
+                                                    class="w-5 h-5 rounded-full border-2 border-outline-variant flex items-center justify-center peer-checked:border-primary peer-checked:bg-primary/20 transition-all">
+                                                    <div
+                                                        class="w-2.5 h-2.5 rounded-full bg-primary scale-0 peer-checked:scale-100 transition-transform">
+                                                    </div>
+                                                </div>
+                                                <span
+                                                    class="ml-sm font-body-md text-body-md text-on-surface-variant group-hover:text-on-background transition-colors">No</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <!-- Performance Rating Slider -->
+                                    <div class="space-y-sm pt-xs">
+                                        <div class="flex justify-between items-center">
+                                            <label
+                                                class="font-label-md text-label-md text-on-surface-variant">Performance
+                                                Rating</label>
+                                            <span
+                                                class="font-mono-sm text-mono-sm text-primary bg-primary/10 px-xs py-0.5 rounded border border-primary/20"
+                                                id="perfRatingVal">4.2</span>
+                                        </div>
+                                        <input class="w-full" id="perfRating" max="5" min="1"
+                                            oninput="document.getElementById('perfRatingVal').innerText = this.value"
+                                            step="0.1" type="range" value="4.2">
+                                    </div>
+                                    <!-- Job Role -->
+                                    <div class="space-y-xs">
+                                        <label class="font-label-md text-label-md text-on-surface-variant">Job
+                                            Role</label>
+                                        <input
+                                            class="w-full bg-surface-container-low border border-outline-variant text-on-background px-md py-sm focus:ring-0 focus:border-primary rounded font-body-md text-body-md transition-colors placeholder:opacity-30"
+                                            id="jobRole" placeholder="e.g. Senior Data Scientist" type="text"
+                                            value="Research Scientist">
+                                    </div>
+                                </div>
+                                <!-- Form Footer -->
+                                <div
+                                    class="md:col-span-2 pt-lg flex items-center justify-between border-t border-outline-variant mt-md">
+                                    <button
+                                        class="bg-on-background text-background font-bold px-xl py-md rounded hover:bg-primary hover:text-white transition-all active:scale-95 shadow-lg shadow-black/20 flex items-center gap-sm"
+                                        type="submit">
+                                        <span class="material-symbols-outlined" style="font-size: 20px;">bolt</span>
+                                        Predict Risk
+                                    </button>
+                                    <div
+                                        class="hidden md:flex items-center gap-md opacity-40 hover:opacity-100 transition-opacity">
+                                        <span class="text-[10px] font-mono tracking-widest uppercase"
+                                            id="riskLevelLabel">Confidence Score Target: 94.2%</span>
+                                        <span class="material-symbols-outlined">verified_user</span>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <!-- Right Side: Real-time Analytics Visualizer -->
+                    <div class="md:col-span-12 lg:col-span-4 space-y-lg">
+                        <!-- Prediction Card (State Preview) -->
+                        <div
+                            class="bg-surface-container border border-outline-variant rounded-lg p-lg relative overflow-hidden group">
+                            <h3
+                                class="font-label-md text-label-md text-on-surface-variant mb-md flex items-center gap-xs uppercase tracking-widest">
+                                <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                                Live Prediction Output
+                            </h3>
+                            <div class="text-center py-xl">
+                                <div class="text-[64px] font-bold leading-none mb-xs text-on-background"
+                                    id="predictionValue">--%</div>
+                                <p class="text-on-surface-variant opacity-60" id="predictionLabel">Attrition Probability
+                                </p>
+                            </div>
+                            <div class="mt-lg space-y-sm">
+                                <div class="flex justify-between items-center text-xs">
+                                    <span class="text-on-surface-variant">Impact: Overtime</span>
+                                    <span class="text-primary" id="impactOvertime">--</span>
+                                </div>
+                                <div class="w-full h-1.5 bg-surface-container-high rounded-full overflow-hidden">
+                                    <div class="bg-primary h-full" id="impactOvertimeBar" style="width: 0%;"></div>
+                                </div>
+                                <div class="flex justify-between items-center text-xs">
+                                    <span class="text-on-surface-variant">Impact: Job Level</span>
+                                    <span class="text-tertiary" id="impactJobLevel">--</span>
+                                </div>
+                                <div class="w-full h-1.5 bg-surface-container-high rounded-full overflow-hidden">
+                                    <div class="bg-tertiary h-full" id="impactJobLevelBar" style="width: 0%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Data Density Note -->
+                        <div class="bg-surface-container-low border border-outline-variant rounded-lg p-md">
+                            <div class="flex items-start gap-md">
+                                <span class="material-symbols-outlined text-primary">info</span>
+                                <div class="space-y-xs">
+                                    <p class="font-label-md text-label-md font-bold">Inference Engine Note</p>
+                                    <p class="text-[11px] leading-relaxed opacity-60">The attrition model considers 142
+                                        latent features including historical peer movement. High accuracy requires
+                                        precise Monthly Income values.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Backend API base — change this if your FastAPI server runs elsewhere
+        const API_BASE = window.location.origin;
+
+        // Wire up custom number-input steppers
+        document.querySelectorAll('button[data-target]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const input = document.getElementById(btn.dataset.target);
+                const step = parseFloat(btn.dataset.step);
+                input.value = (parseFloat(input.value) || 0) + step;
+            });
+        });
+
+        function showBanner(message, type) {
+            const banner = document.getElementById('connectionBanner');
+            banner.textContent = message;
+            banner.classList.remove('hidden', 'bg-primary/10', 'border-primary/20', 'text-primary',
+                'bg-tertiary/10', 'border-tertiary/20', 'text-tertiary');
+            if (type === 'error') {
+                banner.classList.add('bg-primary/10', 'border-primary/20', 'text-primary');
+            } else {
+                banner.classList.add('bg-tertiary/10', 'border-tertiary/20', 'text-tertiary');
+            }
+        }
+
+        document.getElementById('attritionForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<span class="material-symbols-outlined animate-spin">autorenew</span> Calculating...';
+            btn.disabled = true;
+
+            // Field names match your EmployeeData Pydantic model exactly
+            const payload = {
+                employee_id: parseInt(document.getElementById("employeeId").value),
+
+                Age: parseInt(document.getElementById("age").value),
+                Department: document.getElementById("department").value,
+                JobRole: document.getElementById("jobRole").value,
+                OverTime: document.querySelector('input[name="overtime"]:checked').value,
+
+                JobLevel: parseInt(document.getElementById("jobLevel").value),
+                PerformanceRating: parseInt(document.getElementById("perfRating").value),
+
+                MonthlyIncome: parseInt(document.getElementById("monthlyIncome").value),
+
+                BusinessTravel: document.getElementById("businessTravel").value,
+                DailyRate: parseInt(document.getElementById("dailyRate").value),
+                DistanceFromHome: parseInt(document.getElementById("distanceFromHome").value),
+
+                Education: parseInt(document.getElementById("education").value),
+                EducationField: document.getElementById("educationField").value,
+
+                EnvironmentSatisfaction: parseInt(document.getElementById("environmentSatisfaction").value),
+
+                Gender: document.getElementById("gender").value,
+
+                JobInvolvement: parseInt(document.getElementById("jobInvolvement").value),
+
+                JobSatisfaction: parseInt(document.getElementById("jobSatisfaction").value),
+
+                MaritalStatus: document.getElementById("maritalStatus").value,
+
+                NumCompaniesWorked: parseInt(document.getElementById("numCompaniesWorked").value),
+
+                PercentSalaryHike: parseInt(document.getElementById("percentSalaryHike").value),
+
+                RelationshipSatisfaction: parseInt(document.getElementById("relationshipSatisfaction").value),
+
+                StockOptionLevel: parseInt(document.getElementById("stockOptionLevel").value),
+
+                TotalWorkingYears: parseInt(document.getElementById("totalWorkingYears").value),
+
+                TrainingTimesLastYear: parseInt(document.getElementById("trainingTimesLastYear").value),
+
+                WorkLifeBalance: parseInt(document.getElementById("workLifeBalance").value),
+
+                YearsAtCompany: parseInt(document.getElementById("yearsAtCompany").value),
+
+                YearsInCurrentRole: parseInt(document.getElementById("yearsInCurrentRole").value),
+
+                YearsSinceLastPromotion: parseInt(document.getElementById("yearsSinceLastPromotion").value),
+
+                YearsWithCurrManager: parseInt(document.getElementById("yearsManager").value)
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/predict`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Server responded with status ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (result.status === 'Error') {
+                    throw new Error(result.message || 'Prediction failed');
+                }
+
+                // Backend returns probability_score as a 0-1 decimal, and attrition_risk as High/Low
+                const probabilityPct = (result.probability_score * 100).toFixed(1);
+
+                const predDisplay = document.getElementById('predictionValue');
+                predDisplay.innerText = probabilityPct + '%';
+                predDisplay.classList.add('text-primary');
+                setTimeout(() => predDisplay.classList.remove('text-primary'), 1000);
+
+                document.getElementById('predictionLabel').innerText =
+                    `Attrition Probability (${result.attrition_risk} Risk)`;
+
+                // Simple client-side impact indicators based on the inputs just submitted
+                const overtimeImpact = payload.OverTime === 'Yes' ? 12.4 : -3.1;
+                const jobLevelImpact = payload.JobLevel >= 3 ? -5.2 : 8.7;
+
+                document.getElementById('impactOvertime').innerText =
+                    (overtimeImpact >= 0 ? '+' : '') + overtimeImpact + '%';
+                document.getElementById('impactOvertimeBar').style.width =
+                    Math.min(Math.abs(overtimeImpact), 100) + '%';
+
+                document.getElementById('impactJobLevel').innerText =
+                    (jobLevelImpact >= 0 ? '+' : '') + jobLevelImpact + '%';
+                document.getElementById('impactJobLevelBar').style.width =
+                    Math.min(Math.abs(jobLevelImpact), 100) + '%';
+
+                showBanner(`✓ Prediction saved to database (ID: ${result.employee_id})`, 'success');
+            } catch (err) {
+                console.error('Prediction failed:', err);
+                showBanner(`⚠ ${err.message || 'Could not reach the prediction server.'}`, 'error');
+            } finally {
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+
+</html>

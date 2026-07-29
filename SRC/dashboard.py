@@ -4,11 +4,11 @@ import pandas as pd
 import sqlite3
 import io
 import os
-from task_allocation_engine import get_top_3_recommendations
+from task_allocation_engine import task_allocation, top_recommendation
 
 
 # Configuration
-API_URL = "http://0.0.0:8000"
+API_URL = "http://127.0.0.1:8000"
 
 st.set_page_config(page_title="AI Workforce Manager", layout="wide")
 st.title("📊 AI Workforce Management Dashboard")
@@ -17,7 +17,7 @@ tabs = st.tabs([
     "🔍 Attrition Predictor", 
     "📁 Custom Dataset Workspace",  # New Upload & Allocation Hub
     "📋 Live Database",
-    "⚙️ Internal Bulk Engine"        # Moved original bulk logic here
+    "⚙️ Internal Bulk Engine"        # Moved original bulk logic herek
 ])
 
 # --- TAB 1: ATTRITION PREDICTOR ---
@@ -65,8 +65,8 @@ with tabs[0]:
                 st.error(f"❌ Backend Error (HTTP {response.status_code})")
                 st.write("FastAPI might be crashing internally. Check your FastAPI terminal!")
                 
-        except requests.exceptions.ConnectionError:
-            st.error("🔌 Could not connect to FastAPI! Ensure your Uvicorn server is running in another terminal window.")
+        except Exception as e:
+            st.exception(e)
         
 
 # Import the engine function at the top of your dashboard.py
@@ -99,7 +99,7 @@ with tabs[1]:
             
             department_name = st.selectbox(
                 "Select Department", 
-                ["Finance", "Data Analytics", "Engineering", "HR", "Sales"],
+                list(uploaded_emp["Department"]),
                 key="dept_select"
             )
             
@@ -107,7 +107,7 @@ with tabs[1]:
                 if task_description:
                     with st.spinner("Processing single allocation against uploaded dataset..."):
                         # Correctly call the backend function
-                        results = get_top_3_recommendations(task_description, department_name)
+                        results = top_recommendation(uploaded_emp,task_description, department_name)
                 
                         if not results.empty:
                             st.success("Top 3 Matches Found!")
@@ -165,8 +165,8 @@ with tabs[3]:
         if st.button("Execute Global Assignment", width='stretch', disabled=not (tasks_exist and emps_exist)):
             with st.spinner("Running system-wide optimization..."):
                 # Call your backend engine
-                from task_allocation_engine import run_allocation
-                results = run_allocation()
+                from task_allocation_engine import task_allocation
+                results = task_allocation()
                 
                 if not results.empty:
                     st.success("Global Allocation Complete!")
