@@ -15,7 +15,7 @@ feature_columns = joblib.load("Models/feature_columns.pkl")
 def task_allocation(employee_df, task_df):
     
     # Employee Data preprocessing
-    df = pd.read_excel(employee_df)
+    df = employee_df.copy()
     # -----------------------------
     # Feature Engineering
     # -----------------------------
@@ -80,7 +80,7 @@ def task_allocation(employee_df, task_df):
     scaler_data=scaler.transform(final_df) #convert the data into sclare
     prediction = model.predict_proba(scaler_data)[:, 1]
     
-    df["Attrition_probability"] = prediction
+    df["Attrition_Probability"] = prediction
     
     def risk_level(p):
         if p < 0.30:
@@ -92,7 +92,7 @@ def task_allocation(employee_df, task_df):
 
     #create new columns for allocation
     df["Attrition_Risk_Level"] = df["Attrition_Probability"].apply(risk_level)
-    df["overtime_flag"]= df["overtime"]
+    df["OverTime_Flag"] = df["OverTime"]
     df["Capacity_Score"] = (1 - df["OverTime_Flag"]).astype(float)
     df["recent_performance_score"] = 0.6 + ((df["PerformanceRating"] - 3) / (1)) * 0.3
     df["pervious_performance_score"] =(df["PercentSalaryHike"] / 25.0)
@@ -111,7 +111,7 @@ def task_allocation(employee_df, task_df):
     print("Task dataset preprossing started")
     
     #Task Data preprocessing
-    task_df = pd.read_excel(task_df)
+    task_df = task_df.copy()
     
     task_df_sorted= task_df.sort_values(by=["Priority","Criticality"],ascending=[True,False])
     

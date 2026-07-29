@@ -70,8 +70,8 @@ class TaskUserInput(BaseModel):
     criticality:Annotated[criticality,Field(..., description="[Critical,Non-critical]")]
     
 class AllocationRequest(BaseModel):
-    employees: list[UserInput]
-    tasks: list[TaskUserInput]
+    employee_df: list[UserInput]
+    task_df: list[TaskUserInput]
 
 @app.get("/")
 def home():
@@ -183,9 +183,15 @@ def predict(Data: UserInput):
     }
     
 @app.post("/task allocation")
-def allocation(emp_df: AllocationRequest,task_df: AllocationRequest):
+def allocation(data: AllocationRequest):
+    data.employee_df=pd.DataFrame(
+        [employee.model_dump() for employee in data.employee_df]
+    )
+
+    data.task_df = pd.DataFrame(
+        [task.model_dump() for task in data.task_df])
     try:
-        result=task_allocation(emp_df,task_df)
+        result= task_allocation(data.employee_df,data.task_df)
         return{
             "Status":"Success",
             "Message": "Task allocated to best fitted employee",
