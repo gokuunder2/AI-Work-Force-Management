@@ -99,21 +99,32 @@ def task_allocation(employee_df, task_df):
     df["performance_trend"]= df["recent_performance_score"] - df["pervious_performance_score"]
     df["performance_score"]= df["recent_performance_score"]*0.7+df["performance_trend"]*0.3
     df["performance_score"]+=df["JobSatisfaction"]/100
-    df['Engagement_score'] = df["JObSatisfaction"] + df["EnvironmentSatisfaction"] + df["WorkLifeBalance"]/3 
+    df['Engagement_Score'] = (df["JobSatisfaction"] + df["EnvironmentSatisfaction"] + df["WorkLifeBalance"])/3 
     eng_scaler = MinMaxScaler()# use minmax fit_transform funcation to make the data in binary
     df["Engagement_Score"] = eng_scaler.fit_transform(df[["Engagement_Score"]])
-    df["Burnout_risk"]= 0.4* df["overtime_flag"] + 0.3*(1-df["Engagement_Score"]) + 0.3*(1-df["performance_score"])
+    df["Burnout_Risk"]= 0.4* df["OverTime_Flag"] + 0.3*(1-df["Engagement_Score"]) + 0.3*(1-df["performance_score"])
     
-    
-    #main value for task allocation
-    df["Allocation_score"]= 0.30*df["performance_score"]+0.20*df["Capacity_Score"]+0.15*df["Engagement_Score"]+0.20*(1-df["Burnout_risk"])+0.15*(1-df["Attrition_Probability"])
 
-    print("Task dataset preprossing started")
-    
-    #Task Data preprocessing
+    #main value for task allocation
+    df["Allocation_score"]= 0.30*df["performance_score"]+0.20*df["Capacity_Score"]+0.15*df["Engagement_Score"]+0.20*(1-df["Burnout_Risk"])+0.15*(1-df["Attrition_Probability"])
+
+    print("Task dataset preprocessing started")
+
     task_df = task_df.copy()
-    
-    task_df_sorted= task_df.sort_values(by=["Priority","Criticality"],ascending=[True,False])
+
+    # Create skill vectors
+    employee_skill_matrix = vectorizer.transform(
+        df["skills"].fillna("")
+    )
+
+    task_skill_matrix = vectorizer.transform(
+        task_df["required_skills"].fillna("")
+    )
+
+    task_df_sorted = task_df.sort_values(
+        by=["task_priority", "criticality"],
+        ascending=[True, False]
+    )
     
     assignments=[]
     working_hours=160
@@ -134,64 +145,90 @@ def task_allocation(employee_df, task_df):
         # Store skill match score
         eligible_employees["Skill_Match_Score"] = skill_scores.flatten()
         #flatten is used because cousine similarity returns a 2D array, and we want to convert it to a 1D array for easier handling.
+        print("\nTASK:", task.task_id)
+
+        print("After Department:",
+            len(eligible_employees))
+
+        print("Skill scores:")
+        print(eligible_employees[
+            ["EmployeeNumber", "Skill_Match_Score"]
+        ])
+        
         eligible_employees = eligible_employees[
         eligible_employees["Skill_Match_Score"] > 0.5]
+        print("After Skill:", len(eligible_employees))    
         
-            
-        eleigible_employees = eligible_employees[
+        eligible_employees = eligible_employees[
         eligible_employees["Attrition_Probability"] <= 0.7]
+        print("After Attrition:", len(eligible_employees))
         
         eligible_employees = eligible_employees[
         eligible_employees["Burnout_Risk"] < 0.7]
-        
+        print("After Burnout:", len(eligible_employees))
+       
         eligible_employees = eligible_employees[
         eligible_employees["Capacity_Score"] > 0.2]
+        print("After Capacity:", len(eligible_employees))
          
         #Calculating base allocation score for eligible employees
-        eleigible_employees["Task_Allocation_score"]=(
-            0.25*eleigible_employees["Skill_Match_Score"]+
-            0.20*eleigible_employees["Performance_Score"]+
-            0.15*eleigible_employees["capacity_Score"]+
-            0.10*eleigible_employees["Engagement_Score"]+
-            0.10*(1-eleigible_employees["Atttrition_Probabilitu"])+
-            0.10*(1-eleigible_employees["Burnout_Risk"])
-        ) 
+        eligible_employees["Task_Allocation_score"] = (
+        0.25 * eligible_employees["Skill_Match_Score"]
+        + 0.20 * eligible_employees["performance_score"]
+        + 0.15 * eligible_employees["Capacity_Score"]
+        + 0.10 * eligible_employees["Engagement_Score"]
+        + 0.10 * (1 - eligible_employees["Attrition_Probability"])
+        + 0.10 * (1 - eligible_employees["Burnout_Risk"])
+        )
         
     
         #fainess Penalty
-        if len(assignments)>0:
-            temp_df=pd.DataFrame(assignments)
-            task_count=temp_df["assigned_emp"].value_counts()
-            eleigible_employees["current_task_count"]=(eleigible_employees.index.map(task_count).fillna(0))
-        else:
-            eleigible_employees["current_task_count"]=0
-        
-        eleigible_employees["Task_Allocation_score"]-=0.7*eleigible_employees["current_task_count"]
+        if len(assignments) > 0:
+
+            temp_df = pd.DataFrame(assignments)
+
+            task_count = temp_df["EmployeeNumber"].value_counts()
+
+            eligible_employees["current_task_count"] = (
+                eligible_employees["EmployeeNumber"]
+                .map(task_count)
+                .fillna(0)
+            )
+
+    else:
+        eligible_employees["current_task_count"] = 0
+
+        eligible_employees["Task_Allocation_score"] -= (
+            0.7 * eligible_employees["current_task_count"]
+            )
         
         #selecting top employees
-        best_employees=eleigible_employees.sort_values(by="Task_Allocation_score",asc=False).iloc[0]#used to select row by with the help of indexing
+        best_employee=eligible_employees.sort_values(by="Task_Allocation_score",ascending=False).iloc[0]#used to select row by with the help of indexing
         assignments.append(
             {
                 'Task_id': task.task_id,
                 'Task_name':task.task_name,
-                'Task_skills': task.required_skils,
+                'Task_skills': task.required_skills,
                 'Complexity': task.task_complexity,
-                'Best_employees': best_employees["Name"],
-                'Emp_id.': best_employees["EmployeeNumber"],
-                'Task_Allocation_score': best_employees["Task_Allocation_score"]
+                'EmployeeNumber.': best_employee["EmployeeNumber"],
+                'Task_Allocation_score': best_employee["Task_Allocation_score"]
             }
         )
         
         #reduce capacity
-        reduction=task.estimated_hours/ working_hours
-        
-        df.loc[best_employees.name,"capacity_Score"]-=reduction
-        df["Capacity_Score"]=df["Capacity_Score"].clip(lower=0)
+        reduction = task.estimated_hours / working_hours
+
+        df.loc[
+            best_employee.name,
+            "Capacity_Score"
+        ] -= reduction
+
+        df["Capacity_Score"] = df["Capacity_Score"].clip(lower=0)
         #clip is used for rollback value to zero after crossing zero  
         
-    Allocation_result=pd.DataFrame(assignments)
-    print("Best emplyee for Task!!")
-    return Allocation_result
+    Allocation_result = pd.DataFrame(assignments)
+
+    return Allocation_result.to_dict(orient="records")
 
 #top3_employee for task
 def top_recommendation(employe_df,department,description):
@@ -215,7 +252,7 @@ def top_recommendation(employe_df,department,description):
         
         dept_pool["Total_Score"]=0.7*dept_pool["skill_score"]+0.3*dept_pool["PerformanceRating"]
         
-        top_emp = dept_pool.sort_values(by=["Total_Score"], ascending=False).head(3)
+        top_emp = dept_pool.sort_values(by=["Total_Score"], ascendingending=False).head(3)
         
         return top_emp.to_dict(orient="records")
     except Exception as e:

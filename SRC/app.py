@@ -23,7 +23,7 @@ Gender = Literal["Male","Female"]
 MaritalStatus = Literal["Single","Married","Divorced"]
 stock_option_level = Literal[0,1,2,3]
 class UserInput(BaseModel):
-    employee_id: Annotated[int, Field(..., description="Employee ID")]
+    EmployeeNumber: Annotated[int, Field(..., description="Employee ID")]
     Age: Annotated[int, Field(..., ge=18, le=60, description="Age")]
     Department: Annotated[AllowedDepartment,Field(..., description="Department (allowed values only)"),]
     JobRole: Annotated[str,Field(..., description="Job Role")]
@@ -55,7 +55,7 @@ class UserInput(BaseModel):
     skills: Annotated[str, Field(...,description="skills of Employee")]
 
 Task_complex=Literal["Low","Medium","High"]
-Task_dura=Literal['Long', 'Midterm', 'Short']
+Task_dura=Literal['Long', 'Medium', 'Short']
 criticality=Literal["Critical","Non-critical"]
 class TaskUserInput(BaseModel):
     task_id:Annotated[str, Field(..., description="T_1001")]
@@ -83,7 +83,7 @@ def predict(Data: UserInput):
 
     # Convert Pydantic model to dictionary
     input_data = Data.model_dump()
-    employee_id = input_data.pop("employee_id")
+    EmployeeNumber = input_data.pop("EmployeeNumber")
 
     # Create DataFrame
     df = pd.DataFrame([input_data])
@@ -177,12 +177,12 @@ def predict(Data: UserInput):
     print("\nPrediction:", prediction)
 
     return {
-        "employee_id": employee_id,
+        "EmployeeNumber": EmployeeNumber,
         "prediction": round(float(prediction), 4),
         "attrition": "Yes" if prediction >= 0.5 else "No"
     }
     
-@app.post("/task allocation")
+@app.post("/task_allocation")
 def allocation(data: AllocationRequest):
     data.employee_df=pd.DataFrame(
         [employee.model_dump() for employee in data.employee_df]
