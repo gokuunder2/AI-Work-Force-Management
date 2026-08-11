@@ -1,22 +1,61 @@
+import os
 import joblib
-from fastapi import FastAPI
+import sqlite3
 import pandas as pd
-from pydantic import BaseModel, Field,ValidationError
-from typing import Annotated, Literal
-from .task_allocation_engine import task_allocation,top_recommendation
+from fastapi import FastAPI, HTTPException, Query, UploadFile,File
+import io
+from fastapi.middleware.cors import CORSMiddleware
+from pandas import DataFrame
+from pydantic import BaseModel, Field, ValidationError
+from typing import Annotated, Literal, Optional
 
-# Load model
-model = joblib.load("Models/attrition_model.pkl")
-scaler = joblib.load("Models/scaler.pkl")
-feature_columns = joblib.load("Models/feature_columns.pkl")
+from .task_allocation_engine import task_allocation, top_recommendation, predict_attrition
 
-app = FastAPI(title="Attrition Prediction Model")
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MODELS_DIR = os.path.join(BASE_DIR, "Models")
+DATA_DIR = os.path.join(BASE_DIR, "Datasets")
 
-# Pydantic model for data validation (incoming data validation)
+# Load model artifacts (paths resolved relative to the repo root, not cwd)
+model = joblib.load(os.path.join(MODELS_DIR, "attrition_model.pkl"))
+scaler = joblib.load(os.path.join(MODELS_DIR, "scaler.pkl"))
+feature_columns = joblib.load(os.path.join(MODELS_DIR, "feature_columns.pkl"))
 
-# Restrict Department to an allowed list.
-# Replace the values below with the exact department names used in your training data.
-AllowedDepartment = Literal[ "HR","Research & Development","Sales",]
+app = FastAPI(title="AI Workforce Management API")
+
+# Allow the React (Vite) frontend to call this API from the browser
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # tighten to your deployed frontend origin in production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# -----------------------------------------------------------------------
+# Data loading: the frontend should never have to send full 25-field
+# employee/task records. We load the source datasets once at startup and
+# the API works off that in-memory copy.
+# -----------------------------------------------------------------------
+_employee_df = pd.read_csv(os.path.join(DATA_DIR, "Employee_Attrition_with_Skills.csv"))
+_employee_df = _employee_df.rename(columns={"Skills": "skills"})
+_employee_df["skills"] = _employee_df["skills"].fillna("")
+
+_task_df = pd.read_csv(os.path.join(DATA_DIR, "Task_Dataset.csv"))
+
+REQUIRED_EMPLOYEE_COLUMNS = [
+    "EmployeeNumber", "Age", "Department", "JobRole", "OverTime", "JobLevel",
+    "PerformanceRating", "MonthlyIncome", "BusinessTravel", "DailyRate",
+    "DistanceFromHome", "Education", "EducationField", "EnvironmentSatisfaction",
+    "Gender", "JobInvolvement", "JobSatisfaction", "MaritalStatus",
+    "NumCompaniesWorked", "PercentSalaryHike", "RelationshipSatisfaction",
+    "StockOptionLevel", "TotalWorkingYears", "TrainingTimesLastYear",
+    "WorkLifeBalance", "YearsAtCompany", "YearsInCurrentRole",
+    "YearsSinceLastPromotion", "YearsWithCurrManager", "skills",
+]
+_employee_df: DataFrame = _employee_df[[c for c in REQUIRED_EMPLOYEE_COLUMNS if c in _employee_df.columns]]
+
+
+AllowedDepartment = Literal[ "Human Resources","Research & Development","Sales",]
 overtime = Literal["Yes","No"]
 BusinessTravel = Literal["Non-Travel","Travel_Frequently","Travel_Rarely"]
 Gender = Literal["Male","Female"]
@@ -30,7 +69,7 @@ class UserInput(BaseModel):
     OverTime: Annotated[overtime, Field(..., description="Overtime")]
     JobLevel: Annotated[int,Field(...,ge=1,le=5, description="Job Level")]
     PerformanceRating: Annotated[int, Field(...,ge=1,le=4,  description="Performance Rating")]
-    MonthlyIncome: Annotated[float, Field(...,ge=2000, le=20000, description="Monthly Income")]
+    MonthlyIncome: Annotated[float, Field(...,ge=0, le=20000, description="Monthly Income")]
     BusinessTravel: Annotated[BusinessTravel, Field(..., description="Business Travel")]
     DailyRate: Annotated[int, Field(..., ge=102,le=1500, description="Daily Rate")]
     DistanceFromHome: Annotated[int, Field(..., description="Distance from Home")]
@@ -54,6 +93,18 @@ class UserInput(BaseModel):
     YearsWithCurrManager: Annotated[int, Field(..., ge=0,le=17,description="Years with Current Manager")] 
     skills: Annotated[str, Field(...,description="skills of Employee")]
 
+# Departments/duration/priority values below match what's actually in the CSVs
+# (the original code used "HR" and "Medium" which don't exist in the data and
+# would reject every real request).
+OverTimeLit = Literal["Yes", "No"]
+BusinessTravelLit = Literal["Non-Travel", "Travel_Frequently", "Travel_Rarely"]
+GenderLit = Literal["Male", "Female"]
+MaritalStatusLit = Literal["Single", "Married", "Divorced"]
+StockOptionLevelLit = Literal[0, 1, 2, 3]
+TaskComplexityLit = Literal["Low", "Medium", "High"]
+TaskDurationLit = Literal["Long", "Midterm", "Short"]
+CriticalityLit = Literal["Critical", "Non-critical"]
+
 Task_complex=Literal["Low","Medium","High"]
 Task_dura=Literal['Long', 'Medium', 'Short']
 criticality=Literal["Critical","Non-critical"]
@@ -73,143 +124,329 @@ class AllocationRequest(BaseModel):
     employee_df: list[UserInput]
     task_df: list[TaskUserInput]
 
+class TaskAllocationBody(BaseModel):
+    task_ids: Optional[list[str]] = Field(
+        default=None,
+        description="Subset of task_id values to allocate. Omit to allocate every task on file.",
+    )
+
+
+class RecommendBody(BaseModel):
+    department: AllowedDepartment
+    description: str
+
+
 @app.get("/")
 def home():
-    return {"Message": " Attrition prediction Model is working correctly"}
+    return {"Message": "AI Workforce Management API is running"}
 
 
-@app.post("/predict")
-def predict(Data: UserInput):
 
-    # Convert Pydantic model to dictionary
-    input_data = Data.model_dump()
-    EmployeeNumber = input_data.pop("EmployeeNumber")
+USER_DB_PATH = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    "user.db"
+)
+def _normalize_employee_df(df: DataFrame) -> DataFrame:
+    df = df.copy()
+    if "Skills" in df.columns and "skills" not in df.columns:
+        df = df.rename(columns={"Skills": "skills"})
+    df = df[[c for c in REQUIRED_EMPLOYEE_COLUMNS if c in df.columns]]
+    df = df.reindex(columns=REQUIRED_EMPLOYEE_COLUMNS)
+    if "skills" in df.columns:
+        df["skills"] = df["skills"].fillna("")
+    return df
 
-    # Create DataFrame
-    df = pd.DataFrame([input_data])
 
-    # -----------------------------
-    # Feature Engineering
-    # -----------------------------
-    df["OverTime"] = df["OverTime"].apply(lambda x: 1 if x == "Yes" else 0)
-    df["Gender"] = df["Gender"].apply(lambda x: 1 if x == "Male" else 0)
+def save_employee_to_db(df: DataFrame):
+    if df is None or df.empty:
+        raise ValueError("No employee data provided")
 
-    # Create Buckets
-    df["TenureBucket"] = pd.cut(
-        df["YearsAtCompany"],
-        bins=[-1, 1, 3, 5, 10, 40],
-        labels=["<1", "1-3", "3-5", "5-10", "10+"]
-    )
+    df = _normalize_employee_df(df)
 
-    df["MonthlyIncomeBucket"] = pd.cut(
-        df["MonthlyIncome"],
-        bins=[-1, 3000, 5000, 10000, 15000, 20000],
-        labels=["<3k", "3k-5k", "5k-10k", "10k-15k", "15k+"]
-    )
+    conn = sqlite3.connect(USER_DB_PATH)
 
-    df["AgeBucket"] = pd.cut(
-        df["Age"],
-        bins=[-1, 25, 35, 45, 55, 65],
-        labels=["<25", "25-35", "35-45", "45-55", "55+"]
-    )
+    try:
+        df.to_sql(
+            "employees",
+            conn,
+            if_exists="append",
+            index=False
+        )
+    finally:
+        conn.close()
 
-    # One Hot Encoding
-    categorical_features = [
-        "Department",
-        "TenureBucket",
-        "MonthlyIncomeBucket",
-        "AgeBucket",
-        "JobRole",
-        "BusinessTravel",
-        "EducationField",
-        "MaritalStatus"
-    ]
+def delete_employee_from_db(employee_numbers: Optional[list[int] | int] = None) -> DataFrame:
+    if employee_numbers is None:
+        raise ValueError("employee_numbers must be provided for delete")
+    if isinstance(employee_numbers, int):
+        employee_numbers = [employee_numbers]
 
-    df_encoded = pd.get_dummies(
-        df,
-        columns=categorical_features,
-        drop_first=True
-    )
+    current = fetch_employees_from_db()
+    result = current[~current["EmployeeNumber"].isin(employee_numbers)].copy()
+    result.to_csv(USER_DB_PATH, index=False)
+    return result
 
-    # Drop original columns
-    df_encoded.drop(
-        ["YearsAtCompany", "MonthlyIncome", "Age"],
-        axis=1,
-        inplace=True,
-        errors="ignore"
-    )
 
-    # -----------------------------
-    # Align Features
-    # -----------------------------
-    final_df = pd.DataFrame(0, index=[0], columns=feature_columns)
+def update_employee_in_db(employee_number: int, updates: dict) -> DataFrame:
+    if not isinstance(employee_number, int):
+        raise ValueError("employee_number must be an integer")
+    if not updates:
+        raise ValueError("updates must be provided")
 
-    for col in df_encoded.columns:
-        if col in final_df.columns:
-            final_df[col] = df_encoded[col]
+    current = fetch_employees_from_db()
+    if current.empty or employee_number not in current["EmployeeNumber"].values:
+        raise KeyError(f"EmployeeNumber {employee_number} not found")
 
-    final_df = final_df.astype(float)
+    row_idx = current.index[current["EmployeeNumber"] == employee_number]
+    for col, value in updates.items():
+        if col not in current.columns:
+            raise ValueError(f"Invalid column: {col}")
+        current.loc[row_idx, col] = value
 
-    # -----------------------------
-    # Debug Prints
-    # -----------------------------
-    print("\n========== INPUT ==========")
-    print(df)
+    current.to_csv(USER_DB_PATH, index=False)
+    return current
 
-    print("\n========== ENCODED ==========")
-    print(df_encoded)
 
-    print("\n========== FEATURE COLUMNS ==========")
-    print(feature_columns)
+def fetch_employees_from_db() -> DataFrame:
+    conn = sqlite3.connect(USER_DB_PATH)
 
-    print("\n========== FINAL DF ==========")
-    print(final_df)
+    try:
+        query = "SELECT * FROM employees"
+        df = pd.read_sql_query(query, conn)
+    except Exception:
+        df = pd.DataFrame(columns=REQUIRED_EMPLOYEE_COLUMNS)
+    finally:
+        conn.close()
 
-    # Scale
-    scaled_data = scaler.transform(final_df)
+    return _normalize_employee_df(df)
 
-    print("\n========== SCALED DATA ==========")
-    print(scaled_data)
 
-    # Prediction
-    prediction = model.predict_proba(scaled_data)[0][1]
+def _load_employees_from_db():
+    return fetch_employees_from_db()
 
-    print("\nPrediction:", prediction)
 
+
+# -----------------------------------------------------------------------
+# Listing endpoints -- what the frontend directory/task pages need
+# -----------------------------------------------------------------------
+@app.post("/Employee/upload")
+async def emp_details(file: UploadFile=File(...)):
+    if not file.filename.lower().endswith(".csv"):
+        raise HTTPException(status_code=400, detail="only CSV files are accepted")
+    
+    # read the file 
+    try:
+        contents = await file.read()
+        df = pd.read_csv(io.BytesIO(contents))
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Failed to read CSV file: {e}")
+    
+    # exception 
+    if "Skills" in df.columns and "skills" not in df.columns:
+        df = df.rename(columns={"Skills": "skills"})
+            
+    # required columns
+    REQUIRED_EMPLOYEE_COLUMNS = list(UserInput.model_fields.keys())
+    # validate columns
+    missing = [c for c in REQUIRED_EMPLOYEE_COLUMNS if c not in df.columns]
+    
+    if missing:
+        raise HTTPException(status_code=400, 
+                            detail=f"Missing required columns: {missing}")
+        
+    # exception 
+    if "Skills" in df.columns and "skills" not in df.columns:
+        df = df.rename(columns={"Skills": "skills"})
+    
+    #row by row datavalidation using pydantic model 
+    records=df.to_dict(orient="records")
+    validated=[]
+    row_error=[]
+    
+    for idx, row in enumerate(records):
+        try:
+            emp = UserInput.model_validate(row)
+            validated.append(emp)
+        except ValidationError as e:
+            row_error.append({
+                "row": idx + 2,          # +2 because row 1 is header
+                "errors": e.errors()
+            })
+    if row_error:
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "message": f"{len(row_error)} row(s) failed validation. File was NOT saved.",
+                "errors": row_error[:30]
+            }
+        )
+    
+    #saving file 
+    clean_df=pd.DataFrame([emp.model_dump() for emp in validated])
+    
+    save_employee_to_db(clean_df)
+    global _employee_df
+    _employee_df=_load_employees_from_db()
     return {
-        "EmployeeNumber": EmployeeNumber,
-        "prediction": round(float(prediction), 4),
-        "attrition": "Yes" if prediction >= 0.5 else "No"
+        "status": "Success",
+        "message": f"Uploaded and saved {len(clean_df)} employees",
+        "count": len(clean_df)
     }
     
-@app.post("/task_allocation")
-def allocation(data: AllocationRequest):
-    data.employee_df=pd.DataFrame(
-        [employee.model_dump() for employee in data.employee_df]
-    )
 
-    data.task_df = pd.DataFrame(
-        [task.model_dump() for task in data.task_df])
+@app.get("/employees")
+def list_employees(department: Optional[AllowedDepartment] = None):
+
+    conn = sqlite3.connect(USER_DB_PATH)
+
     try:
-        result= task_allocation(data.employee_df,data.task_df)
-        return{
-            "Status":"Success",
-            "Message": "Task allocated to best fitted employee",
-            "Data": result
-        }
-    except Exception as e:
-        return {"status": "Error", "message": str(e)}
+        df = pd.read_sql_query(
+            "SELECT * FROM employees",
+            conn
+        )
+    finally:
+        conn.close()
+        
+    if department:
+        df = df[df["Department"] == department]
+    records = df.to_dict(orient="records")
     
-@app.post("/Recommed Employee")
-def recommendation(emp_df: list[UserInput],desc: str,dpt: AllowedDepartment):
+    return {
+        "count": len(records),
+        "data": records
+    }
+
+
+@app.get("/employees/{employee_number}")
+def get_employee(employee_number: int):
+
+    conn = sqlite3.connect(USER_DB_PATH)
+
     try:
-        result = top_recommendation(emp_df,dpt,desc)
+        query = """
+            SELECT *
+            FROM employees
+            WHERE EmployeeNumber = ?
+        """
+
+        row = pd.read_sql_query(
+            query,
+            conn,
+            params=(employee_number,)
+        )
+
+    finally:
+        conn.close()
+
+    if row.empty:
+        raise HTTPException(
+            status_code=404,
+            detail="Employee not found"
+        )
+
+    return row.iloc[0].to_dict()
+
+@app.get("/tasks")
+def list_tasks(department: Optional[AllowedDepartment] = None):
+    df = _task_df
+    if department:
+        df = df[df["department"] == department]
+    records = df.to_dict(orient="records")
+    return {"count": len(records), "data": records}
+
+
+@app.get("/tasks/{task_id}")
+def get_task(task_id: str):
+    row = _task_df[_task_df["task_id"] == task_id]
+    if row.empty:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return row.iloc[0].to_dict()
+
+
+# -----------------------------------------------------------------------
+# ML endpoints
+# -----------------------------------------------------------------------
+@app.post("/predict/{employee_number}")
+def predict(employee_number: int):
+
+    conn = sqlite3.connect(USER_DB_PATH)
+    try:
+        query = """
+            SELECT *
+            FROM employees
+            WHERE EmployeeNumber = ?
+        """
+
+        row = pd.read_sql_query(
+            query,
+            conn,
+            params=(employee_number,)
+        )
+
+    finally:
+        conn.close()
+
+    if row.empty:
+        raise HTTPException(
+            status_code=404,
+            detail="Employee not found"
+        )
+
+    try:
+        scored = predict_attrition(row)
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Prediction failed: {e}"
+        )
+
+    result = scored.iloc[0]
+
+    return {
+        "EmployeeNumber": int(result["EmployeeNumber"]),
+        "prediction": round(float(result["Attrition_Probability"]), 4),
+        "attrition": (
+            "Yes"
+            if result["Attrition_Probability"] >= 0.5
+            else "No"),
+        "risk_level": result["Attrition_Risk_Level"],
+    }
+
+@app.post("/task-allocation")
+def allocation(body: TaskAllocationBody = TaskAllocationBody()):
+    task_df = _task_df
+    if body.task_ids:
+        task_df = task_df[task_df["task_id"].isin(body.task_ids)]
+        if task_df.empty:
+            raise HTTPException(status_code=404, detail="None of the given task_ids were found")
+
+    try:
+        result = task_allocation(_employee_df, task_df)
         return {
             "status": "Success",
-            "message": "Best employee according to dataset",
-            "data": result
-}
+            "message": "Tasks allocated to the best-fitted employees",
+            "data": result,
+        }
     except Exception as e:
-        return {"status": "Error", "message": str(e)}
+        raise HTTPException(status_code=500, detail=f"Allocation failed: {e}")
+
+
+@app.post("/recommend")
+def recommendation(body: RecommendBody):
+    conn = sqlite3.Connection(USER_DB_PATH)
+    try:
+        query="""Select * from employees"""
+        row = pd.read_sql_query(query,conn)
+    finally:
+        conn.close()
     
-   
+    try:
+        result = top_recommendation(row, body.department, body.description)
+        return {
+            "status": "Success",
+            "message": "Best-matched employees for the description",
+            "data": result,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Recommendation failed: {e}")

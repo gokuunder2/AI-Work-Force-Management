@@ -1,16 +1,36 @@
-# Environments
-myenv/
+node_modules/
+.venv/
 venv/
 env/
+
 .env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# Python cache
+.vscode/
+.idea/
+
 __pycache__/
-*.py[cod]
+*.pyc
 
-# Data (Optional: use this if your CSVs are very large)
-# data/*.csv
+dist/
+.vite/
 
-# OS files
+*.log
+npm-debug.log*
+
+*.db
+*.sqlite
+*.sqlite3
+
+*.pkl
+*.joblib
+
+allocation_results.csv
+
 .DS_Store
 Thumbs.db
+
+workforce-ai-frontend-connected/
