@@ -4,6 +4,9 @@ import sqlite3
 import pandas as pd
 from fastapi import FastAPI, HTTPException, UploadFile, File
 import io
+import re
+import jwt
+from fastapi import Depends, Header
 from fastapi.middleware.cors import CORSMiddleware
 from pandas import DataFrame
 from pydantic import BaseModel, Field, ValidationError
@@ -23,6 +26,27 @@ scaler = joblib.load(os.path.join(MODELS_DIR, "scaler.pkl"))
 feature_columns = joblib.load(os.path.join(MODELS_DIR, "feature_columns.pkl"))
 
 app = FastAPI(title="AI Workforce Management API")
+
+# Clerk Dashboard -> Configure -> API keys -> "Frontend API URL"
+# e.g. https://your-name-12.clerk.accounts.dev
+CLERK_FRONTEND_API = "https://smart-stork-490.clerk.accounts.dev"
+_jwks_client = jwt.PyJWKClient(f"{CLERK_FRONTEND_API}/.well-known/jwks.json")
+
+
+def get_user_id(authorization: Optional[str] = Header(None)) -> str:
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Please sign in (missing token)")
+    token = authorization.split(" ", 1)[1]
+    try:
+        key = _jwks_client.get_signing_key_from_jwt(token).key
+        payload = jwt.decode(
+            token, key, algorithms=["RS256"],
+            options={"verify_aud": False}, leeway=10,
+        )
+        return payload["sub"]  # Clerk user id, e.g. user_2abc...
+    except Exception as e:
+        raise HTTPException(status_code=401, detail=f"Invalid token: {e}")
+
 
 # Allow the React (Vite) frontend to call this API from the browser.
 # NOTE: browsers reject `Access-Control-Allow-Origin: *` combined with
@@ -64,7 +88,7 @@ REQUIRED_EMPLOYEE_COLUMNS = [
 _employee_df: DataFrame = _employee_df[[c for c in REQUIRED_EMPLOYEE_COLUMNS if c in _employee_df.columns]]
 
 
-AllowedDepartment = Literal["Human Resources", "Research & Development", "Sales"]
+AllowedDepartment = Literal["Human Resources", "Research & Development", "Sales","IT","Finance","Marketing","Operations","Product Management","Legal"]
 overtime = Literal["Yes", "No"]
 BusinessTravel = Literal["Non-Travel", "Travel_Frequently", "Travel_Rarely"]
 Gender = Literal["Male", "Female"]
@@ -110,7 +134,7 @@ class UserInput(BaseModel):
 # duplicate "Medium" here doesn't exist in the task dataset and would reject
 # every real upload row.
 Task_complex = Literal["Low", "Medium", "High"]
-Task_dura = Literal["Long", "Medium", "Short"]
+Task_dura = Literal[1, 2, 3,4,5]  # 1=Short, 2=Midterm, 3=Long
 criticality = Literal["Critical", "Non-critical"]
 
 
@@ -159,12 +183,19 @@ def home():
     return {"Message": "AI Workforce Management API is running"}
 
 
-USER_DB_PATH = os.path.join(DATABASE_DIR, "user.db")
-TASK_DB_PATH = os.path.join(DATABASE_DIR, "task.db")
+def _safe(user_id: str) -> str:
+    return re.sub(r"[^A-Za-z0-9_]", "", user_id)
+
+
+def user_db_path(user_id: str) -> str:
+    return os.path.join(DATABASE_DIR, f"user_{_safe(user_id)}.db")
+
+
+def task_db_path(user_id: str) -> str:
+    return os.path.join(DATABASE_DIR, f"task_{_safe(user_id)}.db")
 
 
 # ------------------------------ employee helpers ------------------------------
-
 def _normalize_employee_df(df: DataFrame) -> DataFrame:
     df = df.copy()
     if "Skills" in df.columns and "skills" not in df.columns:
@@ -176,32 +207,39 @@ def _normalize_employee_df(df: DataFrame) -> DataFrame:
     return df
 
 
-def save_employee_to_db(df: DataFrame):
+def save_employee_to_db(df: DataFrame, user_id: str):
     if df is None or df.empty:
         raise ValueError("No employee data provided")
-
     df = _normalize_employee_df(df)
-
-    conn = sqlite3.connect(USER_DB_PATH)
+    conn = sqlite3.connect(user_db_path(user_id))
     try:
         df.to_sql("employees", conn, if_exists="append", index=False)
     finally:
         conn.close()
 
 
-def delete_employee_from_db(employee_numbers: Optional[list[int] | int] = None) -> DataFrame:
+def fetch_employees_from_db(user_id: str) -> DataFrame:
+    path = user_db_path(user_id)
+    if not os.path.exists(path):
+        return pd.DataFrame(columns=REQUIRED_EMPLOYEE_COLUMNS)
+    conn = sqlite3.connect(path)
+    try:
+        df = pd.read_sql_query("SELECT * FROM employees", conn)
+    except Exception:
+        df = pd.DataFrame(columns=REQUIRED_EMPLOYEE_COLUMNS)
+    finally:
+        conn.close()
+    return _normalize_employee_df(df)
+
+
+def delete_employee_from_db(user_id: str, employee_numbers: Optional[list[int] | int] = None) -> DataFrame:
     if employee_numbers is None:
         raise ValueError("employee_numbers must be provided for delete")
     if isinstance(employee_numbers, int):
         employee_numbers = [employee_numbers]
-
-    current = fetch_employees_from_db()
+    current = fetch_employees_from_db(user_id)
     result = current[~current["EmployeeNumber"].isin(employee_numbers)].copy()
-
-    # Write back into the SQLite table (was previously writing CSV text
-    # over the .db file, which corrupted the database for every other
-    # endpoint that opens it with sqlite3.connect()).
-    conn = sqlite3.connect(USER_DB_PATH)
+    conn = sqlite3.connect(user_db_path(user_id))
     try:
         result.to_sql("employees", conn, if_exists="replace", index=False)
     finally:
@@ -209,44 +247,25 @@ def delete_employee_from_db(employee_numbers: Optional[list[int] | int] = None) 
     return result
 
 
-def update_employee_in_db(employee_number: int, updates: dict) -> DataFrame:
+def update_employee_in_db(user_id: str, employee_number: int, updates: dict) -> DataFrame:
     if not isinstance(employee_number, int):
         raise ValueError("employee_number must be an integer")
     if not updates:
         raise ValueError("updates must be provided")
-
-    current = fetch_employees_from_db()
+    current = fetch_employees_from_db(user_id)
     if current.empty or employee_number not in current["EmployeeNumber"].values:
         raise KeyError(f"EmployeeNumber {employee_number} not found")
-
     row_idx = current.index[current["EmployeeNumber"] == employee_number]
     for col, value in updates.items():
         if col not in current.columns:
             raise ValueError(f"Invalid column: {col}")
         current.loc[row_idx, col] = value
-
-    conn = sqlite3.connect(USER_DB_PATH)
+    conn = sqlite3.connect(user_db_path(user_id))
     try:
         current.to_sql("employees", conn, if_exists="replace", index=False)
     finally:
         conn.close()
     return current
-
-
-def fetch_employees_from_db() -> DataFrame:
-    conn = sqlite3.connect(USER_DB_PATH)
-    try:
-        df = pd.read_sql_query("SELECT * FROM employees", conn)
-    except Exception:
-        df = pd.DataFrame(columns=REQUIRED_EMPLOYEE_COLUMNS)
-    finally:
-        conn.close()
-
-    return _normalize_employee_df(df)
-
-
-def _load_employees_from_db():
-    return fetch_employees_from_db()
 
 
 # -------------------------------- task helpers --------------------------------
@@ -257,40 +276,36 @@ def _normalize_task_df(df: DataFrame) -> DataFrame:
     return df
 
 
-def save_task_to_db(df: DataFrame):
+def save_task_to_db(df: DataFrame, user_id: str):
     if df is None or df.empty:
         raise ValueError("No task data provided")
-
     df = _normalize_task_df(df)
-
-    conn = sqlite3.connect(TASK_DB_PATH)
+    conn = sqlite3.connect(task_db_path(user_id))
     try:
         df.to_sql("tasks", conn, if_exists="append", index=False)
     finally:
         conn.close()
 
 
-def fetch_task_db() -> DataFrame:
-    conn = sqlite3.connect(TASK_DB_PATH)
+def fetch_task_db(user_id: str) -> DataFrame:
+    path = task_db_path(user_id)
+    if not os.path.exists(path):
+        return pd.DataFrame(columns=REQUIRED_TASK_COLUMNS)
+    conn = sqlite3.connect(path)
     try:
         df = pd.read_sql_query("SELECT * FROM tasks", conn)
     except Exception:
         df = pd.DataFrame(columns=REQUIRED_TASK_COLUMNS)
     finally:
         conn.close()
-
     return _normalize_task_df(df)
-
-
-def _load_task_from_db():
-    return fetch_task_db()
 
 
 # -----------------------------------------------------------------------
 # Upload endpoints
 # -----------------------------------------------------------------------
 @app.post("/Employee/upload")
-async def emp_details(file: UploadFile = File(...)):
+async def emp_details(file: UploadFile = File(...), user_id: str = Depends(get_user_id)):
     if not file.filename.lower().endswith(".csv"):
         raise HTTPException(status_code=400, detail="only CSV files are accepted")
 
@@ -307,42 +322,35 @@ async def emp_details(file: UploadFile = File(...)):
     if missing:
         raise HTTPException(status_code=400, detail=f"Missing required columns: {missing}")
 
-    # row by row data validation using pydantic model
     records = df.to_dict(orient="records")
     validated = []
     row_error = []
-
     for idx, row in enumerate(records):
         try:
-            emp = UserInput.model_validate(row)
-            validated.append(emp)
+            validated.append(UserInput.model_validate(row))
         except ValidationError as e:
-            row_error.append({
-                "row": idx + 2,  # +2 because row 1 is header
-                "errors": e.errors()
-            })
+            row_error.append({"row": idx + 2, "errors": e.errors()})
     if row_error:
         raise HTTPException(
             status_code=422,
             detail={
                 "message": f"{len(row_error)} row(s) failed validation. File was NOT saved.",
-                "errors": row_error[:30]
-            }
+                "errors": row_error[:30],
+            },
         )
 
     clean_df = pd.DataFrame([emp.model_dump() for emp in validated])
-    save_employee_to_db(clean_df)
-
+    save_employee_to_db(clean_df, user_id)
     return {
         "status": "Success",
         "message": f"Uploaded and saved {len(clean_df)} employees",
-        "count": len(clean_df)
+        "count": len(clean_df),
     }
 
 
 @app.get("/employees")
-def list_employees(department: Optional[AllowedDepartment] = None):
-    df = fetch_employees_from_db()
+def list_employees(department: Optional[AllowedDepartment] = None, user_id: str = Depends(get_user_id)):
+    df = fetch_employees_from_db(user_id)
     if department:
         df = df[df["Department"] == department]
     records = df.to_dict(orient="records")
@@ -350,8 +358,8 @@ def list_employees(department: Optional[AllowedDepartment] = None):
 
 
 @app.get("/employees/{employee_number}")
-def get_employee(employee_number: int):
-    df = fetch_employees_from_db()
+def get_employee(employee_number: int, user_id: str = Depends(get_user_id)):
+    df = fetch_employees_from_db(user_id)
     row = df[df["EmployeeNumber"] == employee_number]
     if row.empty:
         raise HTTPException(status_code=404, detail="Employee not found")
@@ -359,7 +367,7 @@ def get_employee(employee_number: int):
 
 
 @app.post("/task/upload")
-async def task_details(file: UploadFile = File(...)):
+async def task_details(file: UploadFile = File(...), user_id: str = Depends(get_user_id)):
     if not file.filename.lower().endswith(".csv"):
         raise HTTPException(status_code=400, detail="only csv file is present")
 
@@ -376,41 +384,32 @@ async def task_details(file: UploadFile = File(...)):
     records = df.to_dict(orient="records")
     validated = []
     row_error = []
-
     for idx, row in enumerate(records):
         try:
-            task = TaskUserInput.model_validate(row)
-            # Save the validated/coerced record, not the raw CSV row --
-            # otherwise pydantic's type coercion is discarded and stray
-            # extra columns from the CSV leak into the saved table.
-            validated.append(task.model_dump())
+            validated.append(TaskUserInput.model_validate(row).model_dump())
         except ValidationError as e:
-            row_error.append({
-                "row": idx + 2,
-                "error": e.errors()
-            })
+            row_error.append({"row": idx + 2, "error": e.errors()})
     if row_error:
         raise HTTPException(
             status_code=422,
             detail={
                 "message": f"{len(row_error)} row(s) failed validation. File was NOT saved.",
-                "errors": row_error[:30]
-            }
+                "errors": row_error[:30],
+            },
         )
 
     clean_df = pd.DataFrame(validated)
-    save_task_to_db(clean_df)
-
+    save_task_to_db(clean_df, user_id)
     return {
         "status": "Success",
         "message": f"Uploaded and saved {len(clean_df)} tasks",
-        "count": len(clean_df)
+        "count": len(clean_df),
     }
 
 
 @app.get("/tasks")
-def list_tasks(department: Optional[AllowedDepartment] = None):
-    df = fetch_task_db()
+def list_tasks(department: Optional[AllowedDepartment] = None, user_id: str = Depends(get_user_id)):
+    df = fetch_task_db(user_id)
     if department:
         df = df[df["department"] == department]
     records = df.to_dict(orient="records")
@@ -418,8 +417,8 @@ def list_tasks(department: Optional[AllowedDepartment] = None):
 
 
 @app.get("/tasks/{task_id}")
-def get_task(task_id: str):
-    df = fetch_task_db()
+def get_task(task_id: str, user_id: str = Depends(get_user_id)):
+    df = fetch_task_db(user_id)
     row = df[df["task_id"] == task_id]
     if row.empty:
         raise HTTPException(status_code=404, detail="Task not found")
@@ -430,19 +429,17 @@ def get_task(task_id: str):
 # ML endpoints
 # -----------------------------------------------------------------------
 @app.post("/predict/{employee_number}")
-def predict(employee_number: int):
-    df = fetch_employees_from_db()
+def predict(employee_number: int, user_id: str = Depends(get_user_id)):
+    df = fetch_employees_from_db(user_id)
     row = df[df["EmployeeNumber"] == employee_number]
     if row.empty:
         raise HTTPException(status_code=404, detail="Employee not found")
-
     try:
         scored = predict_attrition(row)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Prediction failed: {e}")
 
     result = scored.iloc[0]
-
     return {
         "EmployeeNumber": int(result["EmployeeNumber"]),
         "prediction": round(float(result["Attrition_Probability"]), 4),
@@ -452,15 +449,19 @@ def predict(employee_number: int):
 
 
 @app.post("/task-allocation")
-def allocation(body: TaskAllocationBody = TaskAllocationBody()):
-    task_df = _task_df
+def allocation(body: TaskAllocationBody = TaskAllocationBody(), user_id: str = Depends(get_user_id)):
+    task_df = fetch_task_db(user_id)
     if body.task_ids:
         task_df = task_df[task_df["task_id"].isin(body.task_ids)]
         if task_df.empty:
             raise HTTPException(status_code=404, detail="None of the given task_ids were found")
 
+    emp_df = fetch_employees_from_db(user_id)
+    if emp_df.empty or task_df.empty:
+        raise HTTPException(status_code=400, detail="Upload employees and tasks first")
+
     try:
-        result = task_allocation(_employee_df, task_df)
+        result = task_allocation(emp_df, task_df)
         return {
             "status": "Success",
             "message": "Tasks allocated to the best-fitted employees",
@@ -471,10 +472,12 @@ def allocation(body: TaskAllocationBody = TaskAllocationBody()):
 
 
 @app.post("/recommend")
-def recommendation(body: RecommendBody):
-    row = fetch_employees_from_db()
+def recommendation(body: RecommendBody, user_id: str = Depends(get_user_id)):
+    emp_df = fetch_employees_from_db(user_id)
+    if emp_df.empty:
+        raise HTTPException(status_code=400, detail="Upload employees first")
     try:
-        result = top_recommendation(row, body.department, body.description)
+        result = top_recommendation(emp_df, body.department, body.description)
         return {
             "status": "Success",
             "message": "Best-matched employees for the description",
